@@ -28,7 +28,7 @@ def getquestion(qtype='1', date = '2012-01-01',thematic = ''):
     commentpic = None
     if re.search('\(pic: ',question) != None:
         question = re.split('\)',question, maxsplit = 1)
-        pic = re.search('\d\d\d\d\d\d\d\d.jpg',question[0])
+        pic = re.search('\d\d\d\d\d\d\d\d.jpg',question[0]).group(0)
         pic = 'https://db.chgk.info/images/db/' + pic
         question = question[1]
     if comment != None:
