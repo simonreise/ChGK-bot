@@ -12,7 +12,7 @@ vk_session = vk_api.VkApi(token='5faee013592f2171918b1ea14b101bd2d5312e73cefd211
 longpoll = VkLongPoll(vk_session)
 vk = vk_session.get_api()
 
-def question(qtype='1', date = '2012-01-01',thematic = ''):
+def getquestion(qtype='1', date = '2012-01-01',thematic = ''):
     url = 'https://db.chgk.info/xml/random/from_'+date+'/types'+qtype+'/limit1/'+thematic
     questionxml = requests.get(url)
     questionxml = ElementTree.fromstring(questionxml.content)
@@ -34,7 +34,7 @@ def question(qtype='1', date = '2012-01-01',thematic = ''):
         comment = comment[1]
     return question, answer, comment,author,pic,commentpic
 
-def message(text,pic,event):
+def sendmessage(text,pic,event):
     if pic != None:
         upload = VkUpload(vk_session)
         image_url = pic
@@ -73,5 +73,5 @@ def message(text,pic,event):
 for event in longpoll.listen():
     if event.type == VkEventType.MESSAGE_NEW and event.to_me and event.text:
         if event.text == 'Вопрос' or event.text == 'вопрос':
-            question, answer, comment, author, pic, commentpic = question()
-            message(question,pic,event)
+            question, answer, comment, author, pic, commentpic = getquestion()
+            sendmessage(question,pic,event)
