@@ -43,12 +43,14 @@ def message(text,pic,event):
         if event.from_user:
             vk.messages.send(
                 user_id=event.user_id,
+                random_id=get_random_id(),
                 attachment=attach,
                 message=text
                 )
         elif event.from_chat:
             vk.messages.send(
                 chat_id=event.chat_id,
+                random_id=get_random_id(),
                 attachment=attach,
                 message=text
                 )
@@ -56,11 +58,13 @@ def message(text,pic,event):
         if event.from_user:
             vk.messages.send(
                 user_id=event.user_id,
+                random_id=get_random_id(),
                 message=text
                 )
         elif event.from_chat:
             vk.messages.send(
                 chat_id=event.chat_id,
+                random_id=get_random_id(),
                 message=text
                 )
 
