@@ -1,0 +1,55 @@
+import re
+import requests
+import json
+import vk_api
+from vk_api.longpoll import VkLongPoll, VkEventType
+from vk_api import VkUpload
+#import urllib3
+#import xmltodict
+
+session = requests.Session()
+vk_session = vk_api.VkApi(token='5faee013592f2171918b1ea14b101bd2d5312e73cefd211236a775c3274c091153fe20706ca3953669a85')
+longpoll = VkLongPoll(vk_session)
+vk = vk_session.get_api()
+
+def question(qtype='1', date = '2012-01-01',thematic = ''):
+    url = 'https://db.chgk.info/xml/random/from_'+date+'/types'+qtype+'/limit1/'+thematic
+    questionxml = requests.get(url)
+    question = questionxml.json()['Question']
+    answer = questionxml.json()['Answer']
+    comment = questionxml.json().get('Comments')
+    author = questionxml.json().get('Authors')
+    pic = None
+    commentpic = None
+    if re.search('(pic: ',question) != None:
+        question = re.split(')',question, maxsplit = 1)
+        pic = re.search('\d\d\d\d\d\d\d\d.jpg',question[0])
+        pic = 'https://db.chgk.info/images/db/' + pic
+        question = question[1]
+    if re.search('(pic: ',comment) != None:
+        comment = re.split(')',comment, maxsplit = 1)
+        commentpic = re.search('\d\d\d\d\d\d\d\d.jpg',comment[0])
+        commentpic = 'https://db.chgk.info/images/db/'+pic
+        comment = comment[1]
+    return question, answer, comment,author,pic,commentpic
+
+for event in longpoll.listen():
+    if event.type == VkEventType.MESSAGE_NEW and event.to_me and event.text:
+        if event.text == 'Вопрос' or event.text == 'вопрос':
+            question, answer, comment, author, pic, commentpic = question()
+            if pic != None:
+                upload = VkUpload(vk_session)
+                image_url = pic
+                image = session.get(image_url, stream=True)
+                photo = upload.photo_messages(photos=image.raw)[0]
+                attach='photo{}_{}'.format(photo['owner_id'], photo['id'])
+                vk.messages.send(
+                    chat_id=event.chat_id,
+                    attachment=attach,
+                    message=question
+                    )
+            else:
+                vk.messages.send(
+                    chat_id=event.chat_id,
+                    message=question
+                    )
