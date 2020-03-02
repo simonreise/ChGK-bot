@@ -27,7 +27,7 @@ def question(qtype='1', date = '2012-01-01',thematic = ''):
         pic = 'https://db.chgk.info/images/db/' + pic
         question = question[1]
     if re.search('(\pic: ',comment) != None:
-        comment = re.split(')',comment, maxsplit = 1)
+        comment = re.split('\)',comment, maxsplit = 1)
         commentpic = re.search('\d\d\d\d\d\d\d\d.jpg',comment[0])
         commentpic = 'https://db.chgk.info/images/db/'+pic
         comment = comment[1]
