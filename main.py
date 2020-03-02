@@ -34,7 +34,7 @@ def getquestion(qtype='1', date = '2012-01-01',thematic = ''):
     if comment != None:
         if re.search('\(pic: ',comment) != None:
             comment = re.split('\)',comment, maxsplit = 1)
-            commentpic = re.search('\d\d\d\d\d\d\d\d.jpg',comment[0])
+            commentpic = re.search('\d\d\d\d\d\d\d\d.jpg',comment[0]).group(0)
             commentpic = 'https://db.chgk.info/images/db/'+pic
             comment = comment[1]
     return question, answer, comment,author,pic,commentpic
