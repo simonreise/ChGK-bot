@@ -43,13 +43,26 @@ for event in longpoll.listen():
                 image = session.get(image_url, stream=True)
                 photo = upload.photo_messages(photos=image.raw)[0]
                 attach='photo{}_{}'.format(photo['owner_id'], photo['id'])
-                vk.messages.send(
-                    chat_id=event.chat_id,
-                    attachment=attach,
-                    message=question
-                    )
+                if event.from_user:
+                    vk.messages.send(
+                        user_id=event.user_id,
+                        attachment=attach,
+                        message=question
+                        )
+                elif event.from_chat:
+                    vk.messages.send(
+                        chat_id=event.chat_id,
+                        attachment=attach,
+                        message=question
+                        )
             else:
-                vk.messages.send(
-                    chat_id=event.chat_id,
-                    message=question
-                    )
+                if event.from_user:
+                    vk.messages.send(
+                        user_id=event.user_id,
+                        message=question
+                        )
+                elif event.from_chat:
+                    vk.messages.send(
+                        chat_id=event.chat_id,
+                        message=question
+                        )
