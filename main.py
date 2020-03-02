@@ -5,6 +5,7 @@ from xml.etree import ElementTree
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_api import VkUpload
+from vk_api.utils import get_random_id
 
 session = requests.Session()
 vk_session = vk_api.VkApi(token='5faee013592f2171918b1ea14b101bd2d5312e73cefd211236a775c3274c091153fe20706ca3953669a85')
