@@ -18,8 +18,12 @@ def getquestion(qtype='1', date = '2012-01-01',thematic = ''):
     questionxml = ElementTree.fromstring(questionxml.content)
     question = questionxml.find('./question/Question').text.replace('\n',' ')
     answer = questionxml.find('./question/Answer').text.replace('\n',' ')
-    comment = questionxml.find('./question/Comments').text.replace('\n',' ')
-    author = questionxml.find('./question/Authors').text.replace('\n',' ')
+    comment = questionxml.find('./question/Comments').text
+    if comment != None:
+        comment = comment.replace('\n',' ')
+    author = questionxml.find('./question/Authors').text
+    if comment != None:
+        comment = comment.replace('\n',' ')
     pic = None
     commentpic = None
     if re.search('\(pic: ',question) != None:
