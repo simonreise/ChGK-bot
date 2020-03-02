@@ -22,8 +22,8 @@ def getquestion(qtype='1', date = '2012-01-01',thematic = ''):
     if comment != None:
         comment = comment.replace('\n',' ')
     author = questionxml.find('./question/Authors').text
-    if comment != None:
-        comment = comment.replace('\n',' ')
+    if author != None:
+        author = author.replace('\n',' ')
     pic = None
     commentpic = None
     if re.search('\(pic: ',question) != None:
@@ -31,11 +31,12 @@ def getquestion(qtype='1', date = '2012-01-01',thematic = ''):
         pic = re.search('\d\d\d\d\d\d\d\d.jpg',question[0])
         pic = 'https://db.chgk.info/images/db/' + pic
         question = question[1]
-    if re.search('\(pic: ',comment) != None:
-        comment = re.split('\)',comment, maxsplit = 1)
-        commentpic = re.search('\d\d\d\d\d\d\d\d.jpg',comment[0])
-        commentpic = 'https://db.chgk.info/images/db/'+pic
-        comment = comment[1]
+    if comment != None:
+        if re.search('\(pic: ',comment) != None:
+            comment = re.split('\)',comment, maxsplit = 1)
+            commentpic = re.search('\d\d\d\d\d\d\d\d.jpg',comment[0])
+            commentpic = 'https://db.chgk.info/images/db/'+pic
+            comment = comment[1]
     return question, answer, comment,author,pic,commentpic
 
 def sendmessage(text,pic,event):
