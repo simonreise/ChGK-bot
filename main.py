@@ -1,11 +1,10 @@
 import re
 import requests
 import json
+from xml.etree import ElementTree
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_api import VkUpload
-#import urllib3
-#import xmltodict
 
 session = requests.Session()
 vk_session = vk_api.VkApi(token='5faee013592f2171918b1ea14b101bd2d5312e73cefd211236a775c3274c091153fe20706ca3953669a85')
@@ -15,10 +14,11 @@ vk = vk_session.get_api()
 def question(qtype='1', date = '2012-01-01',thematic = ''):
     url = 'https://db.chgk.info/xml/random/from_'+date+'/types'+qtype+'/limit1/'+thematic
     questionxml = requests.get(url)
-    question = questionxml.json()['Question']
-    answer = questionxml.json()['Answer']
-    comment = questionxml.json().get('Comments')
-    author = questionxml.json().get('Authors')
+    questionxml = ElementTree.fromstring(questionxml.content)
+    question = questionxml.find('./question/Question').text.replace('\n',' ')
+    answer = questionxml.find('./question/Answer').text.replace('\n',' ')
+    comment = questionxml.find('./question/Comments').text.replace('\n',' ')
+    author = questionxml.find('./question/Authors').text.replace('\n',' ')
     pic = None
     commentpic = None
     if re.search('(pic: ',question) != None:
