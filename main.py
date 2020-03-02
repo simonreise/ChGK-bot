@@ -33,36 +33,40 @@ def question(qtype='1', date = '2012-01-01',thematic = ''):
         comment = comment[1]
     return question, answer, comment,author,pic,commentpic
 
+def message(text,pic=None,event):
+    if pic != None:
+        upload = VkUpload(vk_session)
+        image_url = pic
+        image = session.get(image_url, stream=True)
+        photo = upload.photo_messages(photos=image.raw)[0]
+        attach='photo{}_{}'.format(photo['owner_id'], photo['id'])
+        if event.from_user:
+            vk.messages.send(
+                user_id=event.user_id,
+                attachment=attach,
+                message=text
+                )
+        elif event.from_chat:
+            vk.messages.send(
+                chat_id=event.chat_id,
+                attachment=attach,
+                message=text
+                )
+    else:
+        if event.from_user:
+            vk.messages.send(
+                user_id=event.user_id,
+                message=text
+                )
+        elif event.from_chat:
+            vk.messages.send(
+                chat_id=event.chat_id,
+                message=text
+                )
+
+
 for event in longpoll.listen():
     if event.type == VkEventType.MESSAGE_NEW and event.to_me and event.text:
         if event.text == 'Вопрос' or event.text == 'вопрос':
             question, answer, comment, author, pic, commentpic = question()
-            if pic != None:
-                upload = VkUpload(vk_session)
-                image_url = pic
-                image = session.get(image_url, stream=True)
-                photo = upload.photo_messages(photos=image.raw)[0]
-                attach='photo{}_{}'.format(photo['owner_id'], photo['id'])
-                if event.from_user:
-                    vk.messages.send(
-                        user_id=event.user_id,
-                        attachment=attach,
-                        message=question
-                        )
-                elif event.from_chat:
-                    vk.messages.send(
-                        chat_id=event.chat_id,
-                        attachment=attach,
-                        message=question
-                        )
-            else:
-                if event.from_user:
-                    vk.messages.send(
-                        user_id=event.user_id,
-                        message=question
-                        )
-                elif event.from_chat:
-                    vk.messages.send(
-                        chat_id=event.chat_id,
-                        message=question
-                        )
+            message(question,pic,event)
