@@ -33,7 +33,7 @@ def question(qtype='1', date = '2012-01-01',thematic = ''):
         comment = comment[1]
     return question, answer, comment,author,pic,commentpic
 
-def message(text,pic=None,event):
+def message(text,pic,event):
     if pic != None:
         upload = VkUpload(vk_session)
         image_url = pic
