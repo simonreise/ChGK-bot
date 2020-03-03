@@ -13,7 +13,8 @@ from vk_api.utils import get_random_id
 DATABASE_URL = os.environ['DATABASE_URL']
 conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 cursor = conn.cursor()
-vktoken = cursor.execute('SELECT * FROM tokens LIMIT 1').fetchone()[1]
+cursor.execute('SELECT * FROM tokens LIMIT 1')
+vktoken = cursor.fetchone()[1]
 cursor.close()
 conn.close()
 session = requests.Session()
