@@ -67,7 +67,7 @@ def getquestion(event,qtype='1', date = '2012-01-01',thematic = ''):
     conn = psycopg2.connect(DATABASE_URL, sslmode='require')
     cursor = conn.cursor()
     values = (ischat, tabid, question, pic, answer, passcr, author, comment, commentpic, resource, tour, currtime, answered)
-    cursor.execute('REPLACE INTO questions (ischat, tabid, question, pic, answer, pass, author, qcomments, commentpic, sources, tour, created, answered) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',values)
+    cursor.execute('REPLACE INTO questions (ischat, tabid, question, pic, answer, pass, author, qcomments, commentpic, sources, tour, created, answered) VALUES (%s)',values)
     conn.commit()
     cursor.close()
     conn.close()
