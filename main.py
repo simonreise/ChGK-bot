@@ -5,7 +5,6 @@ import time
 import json
 from xml.etree import ElementTree
 import psycopg2
-import sql
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_api import VkUpload
