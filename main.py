@@ -66,8 +66,8 @@ def getquestion(event,qtype='1', date = '2012-01-01',thematic = ''):
     answered = False
     conn = psycopg2.connect(DATABASE_URL, sslmode='require')
     cursor = conn.cursor()
-    values = (ischat, tabid, question, pic, answer, passcr, author, comment, commentpic, resource, tour, currtime, answered, question, pic, answer, passcr, author, comment, commentpic, resource, tour, currtime, answered)
-    cursor.execute('INSERT INTO questions (ischat, tabid, question, pic, answer, pass, author, qcomments, commentpic, sources, tour, created, answered) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE question = VALUES(%s), pic = VALUES(%s), answer = VALUES(%s), pass = VALUES(%s), author = VALUES(%s), qcomments = VALUES(%s), commentpic = VALUES(%s), sources = VALUES(%s), tour = VALUES(%s), created = VALUES(%s), answered = VALUES(%s)',values)
+    values = (ischat, tabid, question, pic, answer, passcr, author, comment, commentpic, resource, tour, currtime, answered)
+    cursor.execute('REPLACE INTO questions (ischat, tabid, question, pic, answer, pass, author, qcomments, commentpic, sources, tour, created, answered) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',values)
     conn.commit()
     cursor.close()
     conn.close()
