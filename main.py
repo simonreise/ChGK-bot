@@ -69,7 +69,7 @@ def getquestion(event,qtype='1', date = '2012-01-01',thematic = ''):
     cursor = conn.cursor()
     values = (ischat, tabid, question, pic, answer, passcr, author, comment, commentpic, resource, tour, currtime, answered)
     insert = sql.SQL('REPLACE INTO questions (ischat, tabid, question, pic, answer, pass, author, qcomments, commentpic, sources, tour, created, answered) VALUES {}').format(
-        sql.SQL(',').join(map(sql.Literal, values))
+        sql.SQL(',').join(map(sql.Literal, values)))
     cursor.execute(insert)
     #cursor.execute('REPLACE INTO questions (ischat, tabid, question, pic, answer, pass, author, qcomments, commentpic, sources, tour, created, answered) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (ischat, tabid, question, pic, answer, passcr, author, comment, commentpic, resource, tour, currtime, answered))
     conn.commit()
