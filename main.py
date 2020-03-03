@@ -1,18 +1,26 @@
 import re
 import requests
+import time
 import json
 from xml.etree import ElementTree
+import psycopg2
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_api import VkUpload
 from vk_api.utils import get_random_id
 
+DATABASE_URL = os.environ['DATABASE_URL']
+conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+cursor = conn.cursor()
+vktoken = cursor.execute('SELECT * FROM tokens LIMIT 1').fetchone()[1]
+cursor.close()
+conn.close()
 session = requests.Session()
-vk_session = vk_api.VkApi(token='5faee013592f2171918b1ea14b101bd2d5312e73cefd211236a775c3274c091153fe20706ca3953669a85')
+vk_session = vk_api.VkApi(token=vktoken)
 longpoll = VkLongPoll(vk_session)
 vk = vk_session.get_api()
 
-def getquestion(qtype='1', date = '2012-01-01',thematic = ''):
+def getquestion(event,qtype='1', date = '2012-01-01',thematic = ''):
     url = 'https://db.chgk.info/xml/random/from_'+date+'/types'+qtype+'/limit1/'+thematic
     questionxml = requests.get(url)
     questionxml = ElementTree.fromstring(questionxml.content)
@@ -24,6 +32,15 @@ def getquestion(qtype='1', date = '2012-01-01',thematic = ''):
     author = questionxml.find('./question/Authors').text
     if author != None:
         author = author.replace('\n',' ')
+    pass = questionxml.find('./question/PassCriteria').text
+    if pass != None:
+        pass = pass.replace('\n',' ')
+    resource = questionxml.find('./question/Sources').text
+    if resource != None:
+        resource = resource.replace('\n',' ')
+    tour = questionxml.find('./question/tournamentTitle').text
+    if tour != None:
+        tour = tour.replace('\n',' ')
     pic = None
     commentpic = None
     if re.search('\(pic: ',question) != None:
@@ -37,9 +54,24 @@ def getquestion(qtype='1', date = '2012-01-01',thematic = ''):
             commentpic = re.search('\d\d\d\d\d\d\d\d.jpg',comment[0]).group(0)
             commentpic = 'https://db.chgk.info/images/db/'+pic
             comment = comment[1]
-    return question, answer, comment,author,pic,commentpic
+    currtime = int(time.time())
+    if event.from_chat:
+        ischat = True
+        tabid = event.chat_id
+    elif event.from_user:
+        ischat = False
+        tabid = event.user_id
+    answered = False
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cursor = conn.cursor()
+    values = (ischat, tabid, question, pic, answer, pass, author, comment, commentpic, resource, tour, currtime, answered, question, pic, answer, pass, author, comment, commentpic, resource, tour, currtime, answered)
+    cursor.execute('INSERT INTO questions (ischat, tabid, question, pic, answer, pass, author, qcomments, commentpic, sources, tour, created, answered) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE question = %s pic = %s, answer = %s, pass = %s, author = %s, qcomments = %s, commentpic = %s, sources = %s, tour = %s, created = %s, answered = %s',values)
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return question,pic
 
-def sendmessage(text,pic,event):
+def sendmessage(event,text,pic=None):
     if pic != None:
         upload = VkUpload(vk_session)
         image_url = pic
@@ -78,5 +110,5 @@ def sendmessage(text,pic,event):
 for event in longpoll.listen():
     if event.type == VkEventType.MESSAGE_NEW and event.to_me and event.text:
         if event.text == 'Вопрос' or event.text == 'вопрос':
-            question, answer, comment, author, pic, commentpic = getquestion()
-            sendmessage(question,pic,event)
+            question, pic = getquestion(event)
+            sendmessage(event,question,pic)
