@@ -32,9 +32,9 @@ def getquestion(event,qtype='1', date = '2012-01-01',thematic = ''):
     author = questionxml.find('./question/Authors').text
     if author != None:
         author = author.replace('\n',' ')
-    pass = questionxml.find('./question/PassCriteria').text
-    if pass != None:
-        pass = pass.replace('\n',' ')
+    passcr = questionxml.find('./question/PassCriteria').text
+    if passcr != None:
+        passcr = passcr.replace('\n',' ')
     resource = questionxml.find('./question/Sources').text
     if resource != None:
         resource = resource.replace('\n',' ')
@@ -64,7 +64,7 @@ def getquestion(event,qtype='1', date = '2012-01-01',thematic = ''):
     answered = False
     conn = psycopg2.connect(DATABASE_URL, sslmode='require')
     cursor = conn.cursor()
-    values = (ischat, tabid, question, pic, answer, pass, author, comment, commentpic, resource, tour, currtime, answered, question, pic, answer, pass, author, comment, commentpic, resource, tour, currtime, answered)
+    values = (ischat, tabid, question, pic, answer, passcr, author, comment, commentpic, resource, tour, currtime, answered, question, pic, answer, passcr, author, comment, commentpic, resource, tour, currtime, answered)
     cursor.execute('INSERT INTO questions (ischat, tabid, question, pic, answer, pass, author, qcomments, commentpic, sources, tour, created, answered) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE question = %s pic = %s, answer = %s, pass = %s, author = %s, qcomments = %s, commentpic = %s, sources = %s, tour = %s, created = %s, answered = %s',values)
     conn.commit()
     cursor.close()
