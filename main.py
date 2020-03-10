@@ -162,7 +162,7 @@ def answercheck(event):
     for pass1 in passcr:
         answers.append(pass1)
     variations = []
-    for i in len(answers):
+    for i in range(len(answers)):
         answer = answers[i]
         # удаляем . " пробелы в начале, убираем все пробелы, переводим в ловеркейс
         answer = answer.strip('." ')
