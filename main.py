@@ -159,8 +159,8 @@ def answercheck(event):
     # разбиваем зачет на отдельные варианты по , или ;
     if passcr != None:
         passcr = re.split('; |, ', passcr)
-    for pass1 in passcr:
-        answers.append(pass1)
+        for pass1 in passcr:
+            answers.append(pass1)
     variations = []
     for i in range(len(answers)):
         answer = answers[i]
