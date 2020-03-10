@@ -67,8 +67,8 @@ def getquestion(event,qtype='1', date = '2012-01-01',thematic = ''):
     answered = False
     conn = psycopg2.connect(DATABASE_URL, sslmode='require')
     cursor = conn.cursor()
-    values = (ischat, tabid, question, pic, answer, passcr, author, comment, commentpic, resource, tour, currtime, answered)
-    insert = ('REPLACE INTO questions (ischat, tabid, question, pic, answer, pass, author, qcomments, commentpic, sources, tour, created, answered) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)')
+    values = (ischat, tabid, question, pic, answer, passcr, author, comment, commentpic, resource, tour, currtime, answered, question, pic, answer, passcr, author, comment, commentpic, resource, tour, currtime, answered)
+    insert = ('INSERT INTO questions (ischat, tabid, question, pic, answer, pass, author, qcomments, commentpic, sources, tour, created, answered) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (ischat, tabid) DO UPDATE SET question = %s, pic = %s, answer = %s, pass = %s, author = %s, qcomments = %s, commentpic = %s, sources = %s, tour = %s, created = %s, answered = %s')
     cursor.execute(insert, values)
     conn.commit()
     cursor.close()
