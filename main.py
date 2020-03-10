@@ -247,7 +247,7 @@ for event in longpoll.listen():
             conn = psycopg2.connect(DATABASE_URL, sslmode='require')
             cursor = conn.cursor()
             values = (ischat,tabid)
-            insert = ('UPDATE questions SET answered = true WHERE WHERE ischat = %s AND tabid = %s')
+            insert = ('UPDATE questions SET answered = true WHERE ischat = %s AND tabid = %s')
             cursor.execute(insert, values)
             conn.commit()
             cursor.close()
