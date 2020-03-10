@@ -225,8 +225,9 @@ for event in longpoll.listen():
                 qtype = 6
             else:
                 qtype = 1
+            date = re.search('\d\d\d\d-\d\d-\d\d', message)
             if date != None:
-                date = re.search('\d\d\d\d-\d\d-\d\d', message).group(0)
+                date = date.group(0)
             if date == None:
                 date = '2010-01-01'
             # получаем вопрос, отправляем его сообщением
