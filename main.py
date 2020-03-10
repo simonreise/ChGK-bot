@@ -140,8 +140,33 @@ def getfromtab(event,what):
         tabid = event.user_id
     conn = psycopg2.connect(DATABASE_URL, sslmode='require')
     cursor = conn.cursor()
-    values = (what,ischat,tabid)
-    insert = ('SELECT %s FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
+    values = (ischat,tabid)
+    if what = 'question':
+        insert = ('SELECT question FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
+    elif what = 'pic':
+        insert = ('SELECT pic FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
+    elif what = 'answer':
+        insert = ('SELECT answer FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
+    elif what = 'pass':
+        insert = ('SELECT pass FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
+    elif what = 'author':
+        insert = ('SELECT author FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
+    elif what = 'qcomments':
+        insert = ('SELECT qcomments FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
+    elif what = 'commentpic':
+        insert = ('SELECT commentpic FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
+    elif what = 'sources':
+        insert = ('SELECT sources FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
+    elif what = 'tour':
+        insert = ('SELECT tour FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
+    elif what = 'created':
+        insert = ('SELECT created FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
+    elif what = 'answered':
+        insert = ('SELECT answered FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
+    elif what = 'ischat':
+        insert = ('SELECT ischat FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
+    elif what = 'tabid':
+        insert = ('SELECT tabid FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
     cursor.execute(insert, values)
     got = cursor.fetchone()[0]
     cursor.close()
