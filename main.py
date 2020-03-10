@@ -212,19 +212,19 @@ for event in longpoll.listen():
         if message.split(' ',1)[0] == 'вопрос':
             # определяем тип вопроса и дату, по умолчанию - чгк и 2010-01-01
             if 'чгк' in message.split(' '):
-                qtype = 1
+                qtype = '1'
             elif 'брейн' in message.split(' '):
-                qtype = 2
+                qtype = '2'
             elif 'инетрнет-турнир' in message.split(' '):
-                qtype = 3
+                qtype = '3'
             elif 'бескрылка' in message.split(' '):
-                qtype = 4
+                qtype = '4'
             elif 'cвояк' in message.split(' '):
-                qtype = 5
+                qtype = '5'
             elif 'эрудит-футбол' in message.split(' '):
-                qtype = 6
+                qtype = '6'
             else:
-                qtype = 1
+                qtype = '1'
             date = re.search('\d\d\d\d-\d\d-\d\d', message)
             if date != None:
                 date = date.group(0)
