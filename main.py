@@ -11,24 +11,38 @@ from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_api import VkUpload
 from vk_api.utils import get_random_id
 
+# устанавливаем URL базы данных (для heroku оставить так)
 DATABASE_URL = os.environ['DATABASE_URL']
+# подключаемся к базе данных, таблице tokens, и получаем токен от группы вк
 conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 cursor = conn.cursor()
 cursor.execute('SELECT * FROM tokens LIMIT 1')
 vktoken = cursor.fetchone()[1]
 cursor.close()
 conn.close()
+# инициализируем сессию vkapi
 session = requests.Session()
 vk_session = vk_api.VkApi(token=vktoken)
 longpoll = VkLongPoll(vk_session)
 vk = vk_session.get_api()
 
-def getquestion(event,qtype='1', date = '2012-01-01',thematic = ''):
-    url = 'https://db.chgk.info/xml/random/from_'+date+'/types'+qtype+'/limit1/'+thematic
+# эта функция получает вопрос из базы и записывает его в БД, возвращает вопрос и раздатку-картинку (если есть)
+# аргументы: 
+# qtype - тип вопроса (чгк, свояк и т.д.), по умолчанию чгк; 
+# date - с какой даты получать вопросы (чтобы отбросить разное а-ля чгк 90-х
+def getquestion(event,qtype='1', date = '2010-01-01'):
+    # собираем URL из аргументов
+    url = 'https://db.chgk.info/xml/random/from_'+date+'/types'+qtype+'/limit1/'
+    # получаем xml
     questionxml = requests.get(url)
     questionxml = ElementTree.fromstring(questionxml.content)
+    # извлекаем из xml вопрос, ответ, комментарий, автора, зачет, источник, турнир
     question = questionxml.find('./question/Question').text.replace('\n',' ')
+    if question != None:
+        question = question.replace('\n',' ')
     answer = questionxml.find('./question/Answer').text.replace('\n',' ')
+    if answer != None:
+        answer = answer.replace('\n',' ')
     comment = questionxml.find('./question/Comments').text
     if comment != None:
         comment = comment.replace('\n',' ')
@@ -44,6 +58,7 @@ def getquestion(event,qtype='1', date = '2012-01-01',thematic = ''):
     tour = questionxml.find('./question/tournamentTitle').text
     if tour != None:
         tour = tour.replace('\n',' ')
+    # получаем URL раздатки-картинки из вопроса и комментария если есть
     pic = None
     commentpic = None
     if re.search('\(pic: ',question) != None:
@@ -57,14 +72,18 @@ def getquestion(event,qtype='1', date = '2012-01-01',thematic = ''):
             commentpic = re.search('\d\d\d\d\d\d\d\d.jpg',comment[0]).group(0)
             commentpic = 'https://db.chgk.info/images/db/'+pic
             comment = comment[1]
+    # текущее время
     currtime = int(time.time())
+    # узнаем чат или диалог и записываем id
     if event.from_chat:
         ischat = True
         tabid = event.chat_id
     elif event.from_user:
         ischat = False
         tabid = event.user_id
+    # по дефолту вопрос не отвечен))
     answered = False
+    # записываем полученные данные в БД
     conn = psycopg2.connect(DATABASE_URL, sslmode='require')
     cursor = conn.cursor()
     values = (ischat, tabid, question, pic, answer, passcr, author, comment, commentpic, resource, tour, currtime, answered, question, pic, answer, passcr, author, comment, commentpic, resource, tour, currtime, answered)
@@ -75,6 +94,7 @@ def getquestion(event,qtype='1', date = '2012-01-01',thematic = ''):
     conn.close()
     return question,pic
 
+# эта функция посылает сообщение в чат ивента с текстом и картинкой из аргументов
 def sendmessage(event,text,pic=None):
     if pic != None:
         upload = VkUpload(vk_session)
@@ -110,9 +130,153 @@ def sendmessage(event,text,pic=None):
                 message=text
                 )
 
+# эта функция получает что-то (аргумет what = названию столбца БД) из БД
+def getfromtab(event,what):
+    if event.from_chat:
+        ischat = True
+        tabid = event.chat_id
+    elif event.from_user:
+        ischat = False
+        tabid = event.user_id
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cursor = conn.cursor()
+    values = (what,ischat,tabid)
+    insert = ('SELECT %s FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
+    cursor.execute(insert, values)
+    got = cursor.fetchone()[1]
+    cursor.close()
+    conn.close()
+    return got
 
+# эта функция проверяет ответ на правильность
+def answercheck(event):
+    answered = False
+    answers = []
+    # получаем ответ из БД
+    answers.append(getfromtab(event,'answer'))
+    # получаем зачет из бд
+    passcr = getfromtab(event,'pass')
+    # разбиваем зачет на отдельные варианты по , или ;
+    if passcr != None:
+        passcr = re.split('; |, ', passcr)
+    for pass1 in passcr:
+        answers.append(pass1)
+    variations = []
+    for i in len(answers):
+        answer = answers[i]
+        # удаляем . " пробелы в начале, убираем все пробелы, переводим в ловеркейс
+        answer = answer.strip('." ')
+        answer = answer.replace(' ','')
+        answer = answer.lower()
+        # извлекаем все вариации из ответа (фигня в [])
+        variations1 = re.findall('\[(.*?)\]',answer)
+        for variation in variations1:
+            variations.append(variation)
+        # удаляем все вариации из ответа (фигня в [])
+        answer = re.sub("[\[].*?[\]]", "",answer)
+        answers[i] = answer
+    # те же манипуляции с сообщением пользователя
+    userans = event.text.split(' ',1)[1]
+    userans = userans.strip('." ')
+    userans = userans.replace(' ','')
+    # удаляем все вариации из пользовательского ответа
+    for variation in variations:
+        userans = re.sub(variation, "",userans)
+    # сравниваем ответ пользователя со всеми ответами
+    for answer in answers:
+        if userans == answer:
+            answered = True
+    # если ответ правильный, то обновляем соотв колонку в таблице и отправляем сообщение
+    if answered == True:
+        if event.from_chat:
+            ischat = True
+            tabid = event.chat_id
+        elif event.from_user:
+            ischat = False
+            tabid = event.user_id
+        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+        cursor = conn.cursor()
+        values = (ischat,tabid)
+        insert = ('UPDATE questions SET answered = true WHERE ischat = %s AND tabid = %s')
+        cursor.execute(insert, values)
+        conn.commit()
+        cursor.close()
+        conn.close()
+        sendmessage(event,'Ответ правильный!')
+    
+# ждем сообщений
 for event in longpoll.listen():
     if event.type == VkEventType.MESSAGE_NEW and event.to_me and event.text:
-        if event.text == 'Вопрос' or event.text == 'вопрос':
-            question, pic = getquestion(event)
+        # переводим сообщение в ловеркейс
+        message = event.text.lower()
+        if message.split(' ',1)[0] == 'вопрос':
+            # определяем тип вопроса и дату, по умолчанию - чгк и 2010-01-01
+            if 'чгк' in message.split(' '):
+                qtype = 1
+            elif 'брейн' in message.split(' '):
+                qtype = 2
+            elif 'инетрнет-турнир' in message.split(' '):
+                qtype = 3
+            elif 'бескрылка' in message.split(' '):
+                qtype = 4
+            elif 'cвояк' in message.split(' '):
+                qtype = 5
+            elif 'эрудит-футбол' in message.split(' '):
+                qtype = 6
+            else:
+                qtype = 1
+            date = re.search('\d\d\d\d-\d\d-\d\d', message).group(0)
+            if date == None:
+                date = '2010-01-01'
+            # получаем вопрос, отправляем его сообщением
+            question, pic = getquestion(event,qtype,date)
             sendmessage(event,question,pic)
+        # пользователь просит ответ, помечаем вопрос как отвеченный и отправляем ответ и комментарий
+        elif message == 'ответ':
+            answer = getfromtab(event, 'answer')
+            comment = getfromtab(event, 'qcomments')
+            commentpic = getfromtab(event, 'commentpic')
+            if event.from_chat:
+                ischat = True
+                tabid = event.chat_id
+            elif event.from_user:
+                ischat = False
+                tabid = event.user_id
+            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+            cursor = conn.cursor()
+            values = (ischat,tabid)
+            insert = ('UPDATE questions SET answered = true WHERE WHERE ischat = %s AND tabid = %s')
+            cursor.execute(insert, values)
+            conn.commit()
+            cursor.close()
+            conn.close()
+            sendmessage(event,answer)
+            sendmessage(event,comment,commentpic)
+        # если вопрос отвечен, отправляем комментарий
+        elif message == 'комментарий':
+            answered = getfromtab(event,'answered')
+            if answered == True:
+                comment = getfromtab(event, 'qcomments')
+                commentpic = getfromtab(event, 'commentpic')
+                sendmessage(event,comment,commentpic)
+        # отправляем автора
+        elif message == 'автор':    
+            author = getfromtab(event,'author')
+            sendmessage(event,author)
+        # если вопрос отвечен, отправляем источник
+        elif message == 'источник':    
+            answered = getfromtab(event,'answered')
+            if answered == True:
+                source = getfromtab(event,'sources')
+                source = re.split('\d\.',source)
+                while('' in source): 
+                    source.remove('') 
+                source = '%0A'.join(source)
+                sendmessage(event,source)
+        # отправляем турнир
+        elif message == 'турнир':    
+            tour = getfromtab(event,'tour')
+            sendmessage(event,tour)
+        # если строка начинается с "о ", проверяем ответ (чтобы не читать весь спам из бесед, ибо лагать же будет)
+        elif message.split(' ',1)[0] == 'о':
+            answercheck(event)       
