@@ -225,7 +225,8 @@ for event in longpoll.listen():
                 qtype = 6
             else:
                 qtype = 1
-            date = re.search('\d\d\d\d-\d\d-\d\d', message).group(0)
+            if date != None:
+                date = re.search('\d\d\d\d-\d\d-\d\d', message).group(0)
             if date == None:
                 date = '2010-01-01'
             # получаем вопрос, отправляем его сообщением
@@ -268,10 +269,11 @@ for event in longpoll.listen():
             answered = getfromtab(event,'answered')
             if answered == True:
                 source = getfromtab(event,'sources')
-                source = re.split('\d\.',source)
-                while('' in source): 
-                    source.remove('') 
-                source = '%0A'.join(source)
+                if '1.' in source:
+                    source = re.split('\d\.',source)
+                    while('' in source): 
+                        source.remove('') 
+                    source = '%0A'.join(source)
                 sendmessage(event,source)
         # отправляем турнир
         elif message == 'турнир':    
