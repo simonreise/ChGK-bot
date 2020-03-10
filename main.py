@@ -143,7 +143,7 @@ def getfromtab(event,what):
     values = (what,ischat,tabid)
     insert = ('SELECT %s FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
     cursor.execute(insert, values)
-    got = cursor.fetchone()[1]
+    got = cursor.fetchone()[0]
     cursor.close()
     conn.close()
     return got
