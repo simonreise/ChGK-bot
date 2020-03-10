@@ -141,31 +141,31 @@ def getfromtab(event,what):
     conn = psycopg2.connect(DATABASE_URL, sslmode='require')
     cursor = conn.cursor()
     values = (ischat,tabid)
-    if what = 'question':
+    if what == 'question':
         insert = ('SELECT question FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
-    elif what = 'pic':
+    elif what == 'pic':
         insert = ('SELECT pic FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
-    elif what = 'answer':
+    elif what == 'answer':
         insert = ('SELECT answer FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
-    elif what = 'pass':
+    elif what == 'pass':
         insert = ('SELECT pass FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
-    elif what = 'author':
+    elif what == 'author':
         insert = ('SELECT author FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
-    elif what = 'qcomments':
+    elif what == 'qcomments':
         insert = ('SELECT qcomments FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
-    elif what = 'commentpic':
+    elif what == 'commentpic':
         insert = ('SELECT commentpic FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
-    elif what = 'sources':
+    elif what == 'sources':
         insert = ('SELECT sources FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
-    elif what = 'tour':
+    elif what == 'tour':
         insert = ('SELECT tour FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
-    elif what = 'created':
+    elif what == 'created':
         insert = ('SELECT created FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
-    elif what = 'answered':
+    elif what == 'answered':
         insert = ('SELECT answered FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
-    elif what = 'ischat':
+    elif what == 'ischat':
         insert = ('SELECT ischat FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
-    elif what = 'tabid':
+    elif what == 'tabid':
         insert = ('SELECT tabid FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
     cursor.execute(insert, values)
     got = cursor.fetchone()[0]
