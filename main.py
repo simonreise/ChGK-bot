@@ -216,7 +216,7 @@ def answercheck(event):
     userans = userans.replace('"','')
     # удаляем все вариации из пользовательского ответа
     for variation in variations:
-        answer = answer.replace('[','').replace(']','').replace('(','').replace(')','')
+        variation = variation.replace('[','').replace(']','').replace('(','').replace(')','')
         userans = re.sub(variation, "",userans)
     # сравниваем ответ пользователя со всеми ответами
     for answer in answers:
