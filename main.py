@@ -325,8 +325,8 @@ for event in longpoll.listen():
                 if source != None:
                     sendmessage(event,source)
         # отправляем турнир
-        elif message == 'турнир':    
-        	tour = getfromtab(event,'tour')
+        elif message == 'турнир':
+            tour = getfromtab(event,'tour')
             if tour != None:
                 sendmessage(event,tour)
         # если строка начинается с "о ", проверяем ответ (чтобы не читать весь спам из бесед, ибо лагать же будет)
