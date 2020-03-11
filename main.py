@@ -227,9 +227,9 @@ def answercheck(event):
         elif event.from_user:
             ischat = False
             tabid = event.user_id
-        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-        cursor = conn.cursor()
-        values = (ischat,tabid)
+	conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+	cursor = conn.cursor()
+	values = (ischat,tabid)
         insert = ('UPDATE questions SET answered = true WHERE ischat = %s AND tabid = %s')
         cursor.execute(insert, values)
         conn.commit()
@@ -268,14 +268,14 @@ for event in longpoll.listen():
             if question != None:
                 sendmessage(event,question,pic)
             currtime = int(time.time())
-  	        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-  	        cursor = conn.cursor()
-  	        values = (currtime,)
-  	        insert = 'DELETE FROM questions WHERE created < %s - 86400'
-	        cursor.execute(insert,values)
-  	        conn.commit()
-  	        cursor.close()
-  	        conn.close()
+  	    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+  	    cursor = conn.cursor()
+  	    values = (currtime,)
+  	    insert = 'DELETE FROM questions WHERE created < %s - 86400'
+	    cursor.execute(insert,values)
+  	    conn.commit()
+  	    cursor.close()
+  	    conn.close()
         # пользователь просит ответ, помечаем вопрос как отвеченный и отправляем ответ и комментарий
         elif message == 'ответ':
             answer = getfromtab(event, 'answer')
