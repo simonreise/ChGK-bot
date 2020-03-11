@@ -37,27 +37,27 @@ def getquestion(event,qtype='1', date = '2010-01-01'):
     questionxml = requests.get(url)
     questionxml = ElementTree.fromstring(questionxml.content)
     # извлекаем из xml вопрос, ответ, комментарий, автора, зачет, источник, турнир
-    question = questionxml.find('./question/Question').text
-    if question != None:
-        question = question.replace('\n',' ')
-    answer = questionxml.find('./question/Answer').text
-    if answer != None:
-        answer = answer.replace('\n',' ')
-    comment = questionxml.find('./question/Comments').text
-    if comment != None:
-        comment = comment.replace('\n',' ')
-    author = questionxml.find('./question/Authors').text
-    if author != None:
-        author = author.replace('\n',' ')
-    passcr = questionxml.find('./question/PassCriteria').text
-    if passcr != None:
-        passcr = passcr.replace('\n',' ')
-    resource = questionxml.find('./question/Sources').text
-    if resource != None:
-        resource = resource.replace('\n',' ')
-    tour = questionxml.find('./question/tournamentTitle').text
-    if tour != None:
-        tour = tour.replace('\n',' ')
+    question = questionxml.find('./question/Question')
+    if question != None and question.text != None:
+        question = question.text.replace('\n',' ')
+    answer = questionxml.find('./question/Answer')
+    if answer != None and answer.text != None:
+        answer = answer.text.replace('\n',' ')
+    comment = questionxml.find('./question/Comments')
+    if comment != None and comment.text != None:
+        comment = comment.text.replace('\n',' ')
+    author = questionxml.find('./question/Authors')
+    if author != None and author.text != None:
+        author = author.text.replace('\n',' ')
+    passcr = questionxml.find('./question/PassCriteria')
+    if passcr != None and passcr.text != None:
+        passcr = passcr.text.replace('\n',' ')
+    resource = questionxml.find('./question/Sources')
+    if resource != None and resource.text != None:
+        resource = resource.text.replace('\n',' ')
+    tour = questionxml.find('./question/tournamentTitle')
+    if tour != None and tour.text != None:
+        tour = tour.text.replace('\n',' ')
     # получаем URL раздатки-картинки из вопроса и комментария если есть
     pic = None
     commentpic = None
