@@ -2,6 +2,7 @@ import os
 import re
 import requests
 import time
+import sched
 import json
 from xml.etree import ElementTree
 import psycopg2
@@ -266,6 +267,15 @@ for event in longpoll.listen():
             question, pic = getquestion(event,qtype,date)
             if question != None:
                 sendmessage(event,question,pic)
+            currtime = int(time.time())
+  	        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+  	        cursor = conn.cursor()
+  	        values = (currtime,)
+  	        insert = 'DELETE FROM questions WHERE created < %s - 86400'
+	        cursor.execute(insert,values)
+  	        conn.commit()
+  	        cursor.close()
+  	        conn.close()
         # пользователь просит ответ, помечаем вопрос как отвеченный и отправляем ответ и комментарий
         elif message == 'ответ':
             answer = getfromtab(event, 'answer')
