@@ -242,7 +242,7 @@ def answercheck(event):
     
 # ждем сообщений
 for event in longpoll.listen():
-    if event.type == VkBotEventType.MESSAGE_NEW and event.to_me and event.text:
+    if event.type == VkBotEventType.MESSAGE_NEW:
         # переводим сообщение в ловеркейс
         message = event.text.lower()
         if message.split(' ',1)[0] == 'вопрос':
