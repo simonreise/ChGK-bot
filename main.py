@@ -243,7 +243,7 @@ for event in longpoll.listen():
                 qtype = '1'
             elif 'брейн' in message.split(' '):
                 qtype = '2'
-            elif 'инетрнет-турнир' in message.split(' '):
+            elif 'интернет-турнир' in message.split(' '):
                 qtype = '3'
             elif 'бескрылка' in message.split(' '):
                 qtype = '4'
