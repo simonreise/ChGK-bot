@@ -37,61 +37,65 @@ def getquestion(event,qtype='1', date = '2010-01-01'):
     questionxml = requests.get(url)
     questionxml = ElementTree.fromstring(questionxml.content)
     # извлекаем из xml вопрос, ответ, комментарий, автора, зачет, источник, турнир
-    question = questionxml.find('./question/Question')
-    if question != None and question.text != None:
-        question = question.text.replace('\n',' ')
-    answer = questionxml.find('./question/Answer')
-    if answer != None and answer.text != None:
-        answer = answer.text.replace('\n',' ')
-    comment = questionxml.find('./question/Comments')
-    if comment != None and comment.text != None:
-        comment = comment.text.replace('\n',' ')
-    author = questionxml.find('./question/Authors')
-    if author != None and author.text != None:
-        author = author.text.replace('\n',' ')
-    passcr = questionxml.find('./question/PassCriteria')
-    if passcr != None and passcr.text != None:
-        passcr = passcr.text.replace('\n',' ')
-    resource = questionxml.find('./question/Sources')
-    if resource != None and resource.text != None:
-        resource = resource.text.replace('\n',' ')
-    tour = questionxml.find('./question/tournamentTitle')
-    if tour != None and tour.text != None:
-        tour = tour.text.replace('\n',' ')
-    # получаем URL раздатки-картинки из вопроса и комментария если есть
-    pic = None
-    commentpic = None
-    if re.search('\(pic: ',question) != None:
-        question = re.split('\)',question, maxsplit = 1)
-        pic = re.search('\d\d\d\d\d\d\d\d.jpg',question[0]).group(0)
-        pic = 'https://db.chgk.info/images/db/' + pic
-        question = question[1]
-    if comment != None:
-        if re.search('\(pic: ',comment) != None:
-            comment = re.split('\)',comment, maxsplit = 1)
-            commentpic = re.search('\d\d\d\d\d\d\d\d.jpg',comment[0]).group(0)
-            commentpic = 'https://db.chgk.info/images/db/'+pic
-            comment = comment[1]
-    # текущее время
-    currtime = int(time.time())
-    # узнаем чат или диалог и записываем id
-    if event.from_chat:
-        ischat = True
-        tabid = event.chat_id
-    elif event.from_user:
-        ischat = False
-        tabid = event.user_id
-    # по дефолту вопрос не отвечен))
-    answered = False
-    # записываем полученные данные в БД
-    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-    cursor = conn.cursor()
-    values = (ischat, tabid, question, pic, answer, passcr, author, comment, commentpic, resource, tour, currtime, answered, question, pic, answer, passcr, author, comment, commentpic, resource, tour, currtime, answered)
-    insert = ('INSERT INTO questions (ischat, tabid, question, pic, answer, pass, author, qcomments, commentpic, sources, tour, created, answered) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (ischat, tabid) DO UPDATE SET question = %s, pic = %s, answer = %s, pass = %s, author = %s, qcomments = %s, commentpic = %s, sources = %s, tour = %s, created = %s, answered = %s')
-    cursor.execute(insert, values)
-    conn.commit()
-    cursor.close()
-    conn.close()
+    if questionxml.find('./question/Question') != None:
+        question = questionxml.find('./question/Question').text
+        if question != None:
+            question = question.replace('\n',' ')
+        answer = questionxml.find('./question/Answer').text
+        if answer != None:
+            answer = answer.replace('\n',' ')
+        comment = questionxml.find('./question/Comments').text
+        if comment != None:
+            comment = comment.replace('\n',' ')
+        author = questionxml.find('./question/Authors').text
+        if author != None:
+            author = author.replace('\n',' ')
+        passcr = questionxml.find('./question/PassCriteria').text
+        if passcr != None:
+            passcr = passcr.replace('\n',' ')
+        resource = questionxml.find('./question/Sources').text
+        if resource != None:
+            resource = resource.replace('\n',' ')
+        tour = questionxml.find('./question/tournamentTitle').text
+        if tour != None:
+            tour = tour.replace('\n',' ')
+        # получаем URL раздатки-картинки из вопроса и комментария если есть
+        pic = None
+        commentpic = None
+        if re.search('\(pic: ',question) != None:
+            question = re.split('\)',question, maxsplit = 1)
+            pic = re.search('\d\d\d\d\d\d\d\d.jpg',question[0]).group(0)
+            pic = 'https://db.chgk.info/images/db/' + pic
+            question = question[1]
+        if comment != None:
+            if re.search('\(pic: ',comment) != None:
+                comment = re.split('\)',comment, maxsplit = 1)
+                commentpic = re.search('\d\d\d\d\d\d\d\d.jpg',comment[0]).group(0)
+                commentpic = 'https://db.chgk.info/images/db/'+pic
+                comment = comment[1]
+        # текущее время
+        currtime = int(time.time())
+        # узнаем чат или диалог и записываем id
+        if event.from_chat:
+            ischat = True
+            tabid = event.chat_id
+        elif event.from_user:
+            ischat = False
+            tabid = event.user_id
+        # по дефолту вопрос не отвечен))
+        answered = False
+        # записываем полученные данные в БД
+        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+        cursor = conn.cursor()
+        values = (ischat, tabid, question, pic, answer, passcr, author, comment, commentpic, resource, tour, currtime, answered, question, pic, answer, passcr, author, comment, commentpic, resource, tour, currtime, answered)
+        insert = ('INSERT INTO questions (ischat, tabid, question, pic, answer, pass, author, qcomments, commentpic, sources, tour, created, answered) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (ischat, tabid) DO UPDATE SET question = %s, pic = %s, answer = %s, pass = %s, author = %s, qcomments = %s, commentpic = %s, sources = %s, tour = %s, created = %s, answered = %s')
+        cursor.execute(insert, values)
+        conn.commit()
+        cursor.close()
+        conn.close()
+    else:
+        question = None
+        pic = None
     return question,pic
 
 # эта функция посылает сообщение в чат ивента с текстом и картинкой из аргументов
