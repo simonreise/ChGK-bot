@@ -227,9 +227,9 @@ def answercheck(event):
         elif event.from_user:
             ischat = False
             tabid = event.user_id
-	conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-	cursor = conn.cursor()
-	values = (ischat,tabid)
+		conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+		cursor = conn.cursor()
+		values = (ischat,tabid)
         insert = ('UPDATE questions SET answered = true WHERE ischat = %s AND tabid = %s')
         cursor.execute(insert, values)
         conn.commit()
@@ -288,13 +288,13 @@ for event in longpoll.listen():
                 ischat = False
                 tabid = event.user_id
             conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-            cursor = conn.cursor()
-            values = (ischat,tabid)
-            insert = ('UPDATE questions SET answered = true WHERE ischat = %s AND tabid = %s')
-            cursor.execute(insert, values)
-            conn.commit()
-            cursor.close()
-            conn.close()
+			cursor = conn.cursor()
+			values = (ischat,tabid)
+			insert = ('UPDATE questions SET answered = true WHERE ischat = %s AND tabid = %s')
+			cursor.execute(insert, values)
+			conn.commit()
+			cursor.close()
+			conn.close()
             if answer != None:
                 sendmessage(event,answer)
             if comment != None:
@@ -326,7 +326,7 @@ for event in longpoll.listen():
                     sendmessage(event,source)
         # отправляем турнир
         elif message == 'турнир':    
-            tour = getfromtab(event,'tour')
+        	tour = getfromtab(event,'tour')
             if tour != None:
                 sendmessage(event,tour)
         # если строка начинается с "о ", проверяем ответ (чтобы не читать весь спам из бесед, ибо лагать же будет)
