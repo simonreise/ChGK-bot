@@ -8,7 +8,7 @@ from xml.etree import ElementTree
 import psycopg2
 from psycopg2 import sql
 import vk_api
-from vk_api.longpoll import VkLongPoll, VkEventType
+from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 from vk_api import VkUpload
 from vk_api.utils import get_random_id
 
@@ -24,7 +24,7 @@ conn.close()
 # инициализируем сессию vkapi
 session = requests.Session()
 vk_session = vk_api.VkApi(token=vktoken)
-longpoll = VkLongPoll(vk_session)
+longpoll = VkBotLongPoll(vk_session,'192574160')
 vk = vk_session.get_api()
 
 # эта функция получает вопрос из базы и записывает его в БД, возвращает вопрос и раздатку-картинку (если есть)
