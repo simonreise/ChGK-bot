@@ -234,7 +234,7 @@ def answercheck(event):
     conn.commit()
     cursor.close()
     conn.close()
-	sendmessage(event,'Ответ правильный!')
+    sendmessage(event,'Ответ правильный!')
     
 # ждем сообщений
 for event in longpoll.listen():
@@ -266,6 +266,7 @@ for event in longpoll.listen():
             question, pic = getquestion(event,qtype,date)
             if question != None:
                 sendmessage(event,question,pic)
+            # удаляем вопросы старше 1 дня (ибо лимит 10000 строк)
             currtime = int(time.time())
             conn = psycopg2.connect(DATABASE_URL, sslmode='require')
             cursor = conn.cursor()
