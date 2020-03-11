@@ -77,19 +77,14 @@ def getquestion(event,qtype='1', date = '2010-01-01'):
         # текущее время
         currtime = int(time.time())
         # узнаем чат или диалог и записываем id
-        if event.from_chat:
-            ischat = True
-            tabid = event.chat_id
-        elif event.from_user:
-            ischat = False
-            tabid = event.user_id
+        tabid = event.obj.message['peer_id']
         # по дефолту вопрос не отвечен))
         answered = False
         # записываем полученные данные в БД
         conn = psycopg2.connect(DATABASE_URL, sslmode='require')
         cursor = conn.cursor()
-        values = (ischat, tabid, question, pic, answer, passcr, author, comment, commentpic, resource, tour, currtime, answered, question, pic, answer, passcr, author, comment, commentpic, resource, tour, currtime, answered)
-        insert = ('INSERT INTO questions (ischat, tabid, question, pic, answer, pass, author, qcomments, commentpic, sources, tour, created, answered) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (ischat, tabid) DO UPDATE SET question = %s, pic = %s, answer = %s, pass = %s, author = %s, qcomments = %s, commentpic = %s, sources = %s, tour = %s, created = %s, answered = %s')
+        values = (tabid, question, pic, answer, passcr, author, comment, commentpic, resource, tour, currtime, answered, question, pic, answer, passcr, author, comment, commentpic, resource, tour, currtime, answered)
+        insert = ('INSERT INTO questions (tabid, question, pic, answer, pass, author, qcomments, commentpic, sources, tour, created, answered) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (tabid) DO UPDATE SET question = %s, pic = %s, answer = %s, pass = %s, author = %s, qcomments = %s, commentpic = %s, sources = %s, tour = %s, created = %s, answered = %s')
         cursor.execute(insert, values)
         conn.commit()
         cursor.close()
@@ -107,71 +102,51 @@ def sendmessage(event,text,pic=None):
         image = session.get(image_url, stream=True)
         photo = upload.photo_messages(photos=image.raw)[0]
         attach='photo{}_{}'.format(photo['owner_id'], photo['id'])
-        if event.from_user:
-            vk.messages.send(
-                user_id=event.user_id,
-                random_id=get_random_id(),
-                attachment=attach,
-                message=text
-                )
-        elif event.from_chat:
-            vk.messages.send(
-                chat_id=event.chat_id,
-                random_id=get_random_id(),
-                attachment=attach,
-                message=text
-                )
+        vk.messages.send(
+            peer_id = event.obj.message['peer_id'],
+            random_id=get_random_id(),
+            attachment=attach,
+            message=text
+            )
     else:
-        if event.from_user:
-            vk.messages.send(
-                user_id=event.user_id,
-                random_id=get_random_id(),
-                message=text
-                )
-        elif event.from_chat:
-            vk.messages.send(
-                chat_id=event.chat_id,
-                random_id=get_random_id(),
-                message=text
-                )
+        vk.messages.send(
+            peer_id = event.obj.message['peer_id'],
+            random_id=get_random_id(),
+            message=text
+            )
 
 # эта функция получает что-то (аргумет what = названию столбца БД) из БД
 def getfromtab(event,what):
-    if event.from_chat:
-        ischat = True
-        tabid = event.chat_id
-    elif event.from_user:
-        ischat = False
-        tabid = event.user_id
+    tabid = event.obj.message['peer_id']
     conn = psycopg2.connect(DATABASE_URL, sslmode='require')
     cursor = conn.cursor()
-    values = (ischat,tabid)
+    values = (tabid,)
     if what == 'question':
-        insert = ('SELECT question FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
+        insert = ('SELECT question FROM questions WHERE tabid = %s LIMIT 1')
     elif what == 'pic':
-        insert = ('SELECT pic FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
+        insert = ('SELECT pic FROM questions WHERE tabid = %s LIMIT 1')
     elif what == 'answer':
-        insert = ('SELECT answer FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
+        insert = ('SELECT answer FROM questions WHERE tabid = %s LIMIT 1')
     elif what == 'pass':
-        insert = ('SELECT pass FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
+        insert = ('SELECT pass FROM questions WHERE tabid = %s LIMIT 1')
     elif what == 'author':
-        insert = ('SELECT author FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
+        insert = ('SELECT author FROM questions WHERE tabid = %s LIMIT 1')
     elif what == 'qcomments':
-        insert = ('SELECT qcomments FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
+        insert = ('SELECT qcomments FROM questions WHERE tabid = %s LIMIT 1')
     elif what == 'commentpic':
-        insert = ('SELECT commentpic FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
+        insert = ('SELECT commentpic FROM questions WHERE tabid = %s LIMIT 1')
     elif what == 'sources':
-        insert = ('SELECT sources FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
+        insert = ('SELECT sources FROM questions WHERE tabid = %s LIMIT 1')
     elif what == 'tour':
-        insert = ('SELECT tour FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
+        insert = ('SELECT tour FROM questions WHERE tabid = %s LIMIT 1')
     elif what == 'created':
-        insert = ('SELECT created FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
+        insert = ('SELECT created FROM questions WHERE tabid = %s LIMIT 1')
     elif what == 'answered':
-        insert = ('SELECT answered FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
+        insert = ('SELECT answered FROM questions WHERE tabid = %s LIMIT 1')
     elif what == 'ischat':
-        insert = ('SELECT ischat FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
+        insert = ('SELECT ischat FROM questions WHERE tabid = %s LIMIT 1')
     elif what == 'tabid':
-        insert = ('SELECT tabid FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
+        insert = ('SELECT tabid FROM questions WHERE tabid = %s LIMIT 1')
     cursor.execute(insert, values)
     if cursor.rowcount != 0:
         got = cursor.fetchone()[0]
@@ -210,7 +185,8 @@ def answercheck(event):
         answer = re.sub("[\[].*?[\]]", "",answer)
         answers[i] = answer
     # те же манипуляции с сообщением пользователя
-    userans = event.text.split(' ',1)[1]
+    userans = event.obj.message['text'].lower()
+    userans = userans.split(' ',1)[1]
     userans = userans.strip('." ')
     userans = userans.replace(' ','')
     userans = userans.replace('"','')
@@ -224,16 +200,11 @@ def answercheck(event):
             answered = True
     # если ответ правильный, то обновляем соотв колонку в таблице и отправляем сообщение
     if answered == True:
-        if event.from_chat:
-            ischat = True
-            tabid = event.chat_id
-        elif event.from_user:
-            ischat = False
-            tabid = event.user_id
+        tabid = event.obj.message['peer_id']
         conn = psycopg2.connect(DATABASE_URL, sslmode='require')
         cursor = conn.cursor()
-        values = (ischat,tabid)
-        insert = ('UPDATE questions SET answered = true WHERE ischat = %s AND tabid = %s')
+        values = (tabid,)
+        insert = ('UPDATE questions SET answered = true WHERE tabid = %s')
         cursor.execute(insert, values)
         conn.commit()
         cursor.close()
@@ -244,7 +215,7 @@ def answercheck(event):
 for event in longpoll.listen():
     if event.type == VkBotEventType.MESSAGE_NEW:
         # переводим сообщение в ловеркейс
-        message = event.text.lower()
+        message = event.obj.message['text'].lower()
         if message.split(' ',1)[0] == 'вопрос':
             # определяем тип вопроса и дату, по умолчанию - чгк и 2010-01-01
             if 'чгк' in message.split(' '):
@@ -285,16 +256,11 @@ for event in longpoll.listen():
             answer = getfromtab(event, 'answer')
             comment = getfromtab(event, 'qcomments')
             commentpic = getfromtab(event, 'commentpic')
-            if event.from_chat:
-                ischat = True
-                tabid = event.chat_id
-            elif event.from_user:
-                ischat = False
-                tabid = event.user_id
+            tabid = event.obj.message['peer_id']
             conn = psycopg2.connect(DATABASE_URL, sslmode='require')
             cursor = conn.cursor()
-            values = (ischat,tabid)
-            insert = ('UPDATE questions SET answered = true WHERE ischat = %s AND tabid = %s')
+            values = (tabid,)
+            insert = ('UPDATE questions SET answered = true WHERE tabid = %s')
             cursor.execute(insert, values)
             conn.commit()
             cursor.close()
