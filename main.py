@@ -24,8 +24,8 @@ conn.close()
 # инициализируем сессию vkapi
 session = requests.Session()
 vk_session = vk_api.VkApi(token=vktoken)
-longpoll = VkBotLongPoll(vk_session,'192574160')
 vk = vk_session.get_api()
+longpoll = VkBotLongPoll(vk_session, '192574160')
 
 # эта функция получает вопрос из базы и записывает его в БД, возвращает вопрос и раздатку-картинку (если есть)
 # аргументы: 
@@ -242,7 +242,7 @@ def answercheck(event):
     
 # ждем сообщений
 for event in longpoll.listen():
-    if event.type == VkEventType.MESSAGE_NEW and event.to_me and event.text:
+    if event.type == VkBotEventType.MESSAGE_NEW and event.to_me and event.text:
         # переводим сообщение в ловеркейс
         message = event.text.lower()
         if message.split(' ',1)[0] == 'вопрос':
