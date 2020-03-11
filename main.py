@@ -227,9 +227,9 @@ def answercheck(event):
         elif event.from_user:
             ischat = False
             tabid = event.user_id
-		conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-		cursor = conn.cursor()
-		values = (ischat,tabid)
+	conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+	cursor = conn.cursor()
+	values = (ischat,tabid)
         insert = ('UPDATE questions SET answered = true WHERE ischat = %s AND tabid = %s')
         cursor.execute(insert, values)
         conn.commit()
