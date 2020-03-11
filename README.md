@@ -63,7 +63,6 @@ https://vk.com/bot_chgk
 ```
 CREATE TABLE public.questions
 (
-    ischat boolean NOT NULL,
     tabid bigint NOT NULL,
     question text COLLATE pg_catalog."default",
     pic text COLLATE pg_catalog."default",
@@ -76,8 +75,9 @@ CREATE TABLE public.questions
     tour text COLLATE pg_catalog."default",
     created integer NOT NULL,
     answered boolean NOT NULL,
-    CONSTRAINT questions_pkey PRIMARY KEY (tabid, ischat)
+    CONSTRAINT questions_pkey PRIMARY KEY (tabid)
 )
+
 TABLESPACE pg_default;
 ```
 
