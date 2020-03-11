@@ -168,7 +168,7 @@ def getfromtab(event,what):
     elif what == 'tabid':
         insert = ('SELECT tabid FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
     cursor.execute(insert, values)
-    if cursor.rowcount()!=0:
+    if cursor.rowcount != 0:
         got = cursor.fetchone()[0]
     else: 
         got=None
