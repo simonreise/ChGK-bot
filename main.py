@@ -37,10 +37,10 @@ def getquestion(event,qtype='1', date = '2010-01-01'):
     questionxml = requests.get(url)
     questionxml = ElementTree.fromstring(questionxml.content)
     # извлекаем из xml вопрос, ответ, комментарий, автора, зачет, источник, турнир
-    question = questionxml.find('./question/Question').text.replace('\n',' ')
+    question = questionxml.find('./question/Question').text
     if question != None:
         question = question.replace('\n',' ')
-    answer = questionxml.find('./question/Answer').text.replace('\n',' ')
+    answer = questionxml.find('./question/Answer').text
     if answer != None:
         answer = answer.replace('\n',' ')
     comment = questionxml.find('./question/Comments').text
