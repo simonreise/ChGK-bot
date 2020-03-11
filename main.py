@@ -168,7 +168,10 @@ def getfromtab(event,what):
     elif what == 'tabid':
         insert = ('SELECT tabid FROM questions WHERE ischat = %s AND tabid = %s LIMIT 1')
     cursor.execute(insert, values)
-    got = cursor.fetchone()[0]
+    if cursor.rowcount()!=0:
+        got = cursor.fetchone()[0]
+    else: 
+        got=None
     cursor.close()
     conn.close()
     return got
@@ -277,19 +280,23 @@ for event in longpoll.listen():
             conn.commit()
             cursor.close()
             conn.close()
-            sendmessage(event,answer)
-            sendmessage(event,comment,commentpic)
+            if answer != None:
+                sendmessage(event,answer)
+            if comment != None:
+                sendmessage(event,comment,commentpic)
         # если вопрос отвечен, отправляем комментарий
         elif message == 'комментарий':
             answered = getfromtab(event,'answered')
             if answered == True:
                 comment = getfromtab(event, 'qcomments')
                 commentpic = getfromtab(event, 'commentpic')
-                sendmessage(event,comment,commentpic)
+                if comment != None:
+                    sendmessage(event,comment,commentpic)
         # отправляем автора
         elif message == 'автор':    
             author = getfromtab(event,'author')
-            sendmessage(event,author)
+            if author != None:
+                sendmessage(event,author)
         # если вопрос отвечен, отправляем источник
         elif message == 'источник':    
             answered = getfromtab(event,'answered')
@@ -299,12 +306,14 @@ for event in longpoll.listen():
                     source = re.split('\d\.',source)
                     while('' in source): 
                         source.remove('') 
-                    source = '%0A'.join(source)
-                sendmessage(event,source)
+                    source = "\n".join(source)
+                if source != None:
+                    sendmessage(event,source)
         # отправляем турнир
         elif message == 'турнир':    
             tour = getfromtab(event,'tour')
-            sendmessage(event,tour)
+            if tour != None:
+                sendmessage(event,tour)
         # если строка начинается с "о ", проверяем ответ (чтобы не читать весь спам из бесед, ибо лагать же будет)
         elif message.split(' ',1)[0] == 'о':
             answered = getfromtab(event,'answered')
