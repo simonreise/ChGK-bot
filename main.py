@@ -317,5 +317,5 @@ for event in longpoll.listen():
         # если строка начинается с "о ", проверяем ответ (чтобы не читать весь спам из бесед, ибо лагать же будет)
         elif message.split(' ',1)[0] == 'о':
             answered = getfromtab(event,'answered')
-            if answered == True:
+            if answered == False:
                 answercheck(event)       
