@@ -200,6 +200,7 @@ def answercheck(event):
         # удаляем . " пробелы в начале, убираем все пробелы, переводим в ловеркейс
         answer = answer.strip('." ')
         answer = answer.replace(' ','')
+        answer = answer.replace('"','')
         answer = answer.lower()
         # извлекаем все вариации из ответа (фигня в [])
         variations1 = re.findall('\[(.*?)\]',answer)
@@ -212,6 +213,7 @@ def answercheck(event):
     userans = event.text.split(' ',1)[1]
     userans = userans.strip('." ')
     userans = userans.replace(' ','')
+    userans = userans.replace('"','')
     # удаляем все вариации из пользовательского ответа
     for variation in variations:
         userans = re.sub(variation, "",userans)
@@ -318,8 +320,8 @@ for event in longpoll.listen():
             answered = getfromtab(event,'answered')
             if answered == True:
                 source = getfromtab(event,'sources')
-                if '1.' in source:
-                    source = re.split('\d\.',source)
+                if '1. ' in source:
+                    source = re.split('\d\. ',source)
                     while('' in source): 
                         source.remove('') 
                     source = "\n".join(source)
