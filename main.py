@@ -230,12 +230,12 @@ def answercheck(event):
 	conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 	cursor = conn.cursor()
 	values = (ischat,tabid)
-        insert = ('UPDATE questions SET answered = true WHERE ischat = %s AND tabid = %s')
-        cursor.execute(insert, values)
-        conn.commit()
-        cursor.close()
-        conn.close()
-        sendmessage(event,'Ответ правильный!')
+	insert = ('UPDATE questions SET answered = true WHERE ischat = %s AND tabid = %s')
+	cursor.execute(insert, values)
+	conn.commit()
+	cursor.close()
+	conn.close()
+	sendmessage(event,'Ответ правильный!')
     
 # ждем сообщений
 for event in longpoll.listen():
