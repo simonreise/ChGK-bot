@@ -260,7 +260,8 @@ for event in longpoll.listen():
                 date = '2010-01-01'
             # получаем вопрос, отправляем его сообщением
             question, pic = getquestion(event,qtype,date)
-            sendmessage(event,question,pic)
+            if question != None:
+                sendmessage(event,question,pic)
         # пользователь просит ответ, помечаем вопрос как отвеченный и отправляем ответ и комментарий
         elif message == 'ответ':
             answer = getfromtab(event, 'answer')
