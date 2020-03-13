@@ -25,7 +25,6 @@ conn.close()
 session = requests.Session()
 vk_session = vk_api.VkApi(token=vktoken)
 vk = vk_session.get_api()
-longpoll = VkBotLongPoll(vk_session, '192574160')
 
 # эта функция получает вопрос из базы и записывает его в БД, возвращает вопрос и раздатку-картинку (если есть)
 # аргументы: 
@@ -63,16 +62,25 @@ def getquestion(event,qtype='1', date = '2010-01-01'):
         # получаем URL раздатки-картинки из вопроса и комментария если есть
         pic = None
         commentpic = None
-        if re.search('\(pic: ',question) != None:
-            question = re.split('\)',question, maxsplit = 1)
-            pic = re.search('\d\d\d\d\d\d\d\d.jpg',question[0]).group(0)
-            pic = 'https://db.chgk.info/images/db/' + pic
-            question = question[1]
+        if question != None:
+            if re.search('\(pic: ',question) != None:
+                question = re.split('\)',question, maxsplit = 1)
+                pic = re.split(':',question[0], maxsplit = 1)[1]
+                if 'http' in pic:
+                    pic = pic.strip(' ')
+                else:
+                    pic = re.search('\d\d\d\d\d\d\d\d.jpg',pic).group(0)
+                    pic = 'https://db.chgk.info/images/db/' + pic
+                question = question[1]
         if comment != None:
             if re.search('\(pic: ',comment) != None:
                 comment = re.split('\)',comment, maxsplit = 1)
-                commentpic = re.search('\d\d\d\d\d\d\d\d.jpg',comment[0]).group(0)
-                commentpic = 'https://db.chgk.info/images/db/'+pic
+                commentpic = re.split(':',comment[0], maxsplit = 1)[1]
+                if 'http' in commentpic:
+                    commentpic = commentpic.strip(' ')
+                else:
+                    commentpic = re.search('\d\d\d\d\d\d\d\d.jpg',commentpic).group(0)
+                    commentpic = 'https://db.chgk.info/images/db/'+pic
                 comment = comment[1]
         # текущее время
         currtime = int(time.time())
@@ -176,7 +184,12 @@ def answercheck(event):
         answer = answer.strip('." ')
         answer = answer.replace(' ','')
         answer = answer.replace('"','')
+        answer = answer.replace(',','')
+        answer = answer.replace('.','')
         answer = answer.lower()
+        answer = answer.replace('ё','е')
+        if 'незачет' in answer:
+            answer = re.split('незачет',answer,maxsplit = 1)[0]
         # извлекаем все вариации из ответа (фигня в [])
         variations1 = re.findall('\[(.*?)\]',answer)
         for variation in variations1:
@@ -190,6 +203,9 @@ def answercheck(event):
     userans = userans.strip('." ')
     userans = userans.replace(' ','')
     userans = userans.replace('"','')
+    userans = userans.replace(',','')
+    userans = userans.replace('.','')
+    userans = userans.replace('ё','е')
     # удаляем все вариации из пользовательского ответа
     for variation in variations:
         variation = variation.replace('[','').replace(']','').replace('(','').replace(')','')
@@ -212,95 +228,100 @@ def answercheck(event):
         sendmessage(event,'Ответ правильный!')
     
 # ждем сообщений
-for event in longpoll.listen():
-    if event.type == VkBotEventType.MESSAGE_NEW:
-        # переводим сообщение в ловеркейс
-        message = event.obj.message['text'].lower()
-        if message.split(' ',1)[0] == 'вопрос':
-            # определяем тип вопроса и дату, по умолчанию - чгк и 2010-01-01
-            if 'чгк' in message.split(' '):
-                qtype = '1'
-            elif 'брейн' in message.split(' '):
-                qtype = '2'
-            elif 'интернет-турнир' in message.split(' '):
-                qtype = '3'
-            elif 'бескрылка' in message.split(' '):
-                qtype = '4'
-            elif 'свояк' in message.split(' '):
-                qtype = '5'
-            elif 'эрудит-футбол' in message.split(' '):
-                qtype = '6'
-            else:
-                qtype = '1'
-            date = re.search('\d\d\d\d-\d\d-\d\d', message)
-            if date != None:
-                date = date.group(0)
-            if date == None:
-                date = '2010-01-01'
-            # получаем вопрос, отправляем его сообщением
-            question, pic = getquestion(event,qtype,date)
-            if question != None:
-                sendmessage(event,question,pic)
-            # удаляем вопросы старше 1 дня (ибо лимит 10000 строк)
-            currtime = int(time.time())
-            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-            cursor = conn.cursor()
-            values = (currtime,)
-            insert = 'DELETE FROM questions WHERE created < %s - 86400'
-            cursor.execute(insert,values)
-            conn.commit()
-            cursor.close()
-            conn.close()
-        # пользователь просит ответ, помечаем вопрос как отвеченный и отправляем ответ и комментарий
-        elif message == 'ответ':
-            answer = getfromtab(event, 'answer')
-            comment = getfromtab(event, 'qcomments')
-            commentpic = getfromtab(event, 'commentpic')
-            tabid = event.obj.message['peer_id']
-            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-            cursor = conn.cursor()
-            values = (tabid,)
-            insert = ('UPDATE questions SET answered = true WHERE tabid = %s')
-            cursor.execute(insert, values)
-            conn.commit()
-            cursor.close()
-            conn.close()
-            if answer != None:
-                sendmessage(event,answer)
-            if comment != None:
-                sendmessage(event,comment,commentpic)
-        # если вопрос отвечен, отправляем комментарий
-        elif message == 'комментарий':
-            answered = getfromtab(event,'answered')
-            if answered == True:
-                comment = getfromtab(event, 'qcomments')
-                commentpic = getfromtab(event, 'commentpic')
-                if comment != None:
-                    sendmessage(event,comment,commentpic)
-        # отправляем автора
-        elif message == 'автор':    
-            author = getfromtab(event,'author')
-            if author != None:
-                sendmessage(event,author)
-        # если вопрос отвечен, отправляем источник
-        elif message == 'источник':    
-            answered = getfromtab(event,'answered')
-            if answered == True:
-                source = getfromtab(event,'sources')
-                if '1. ' in source:
-                    source = re.split('\d\. ',source)
-                    while('' in source): 
-                        source.remove('') 
-                    source = "\n".join(source)
-                if source != None:
-                    sendmessage(event,source)
-        # отправляем турнир
-        elif message == 'турнир':
-            tour = getfromtab(event,'tour')
-            if tour != None:
-                sendmessage(event,tour)
-        # если строка начинается с "о ", проверяем ответ (чтобы не читать весь спам из бесед, ибо лагать же будет)
-        elif message.split(' ',1)[0] == 'о':
-            answered = getfromtab(event,'answered')
-            if answered == False:
-                answercheck(event)       
+while True:
+    longpoll = VkBotLongPoll(vk_session, '192574160')
+    try:
+        for event in longpoll.listen():
+            if event.type == VkBotEventType.MESSAGE_NEW:
+                # переводим сообщение в ловеркейс
+                message = event.obj.message['text'].lower()
+                if message.split(' ',1)[0] == 'вопрос':
+                    # определяем тип вопроса и дату, по умолчанию - чгк и 2010-01-01
+                    if 'чгк' in message.split(' '):
+                        qtype = '1'
+                    elif 'брейн' in message.split(' '):
+                        qtype = '2'
+                    elif 'интернет-турнир' in message.split(' '):
+                        qtype = '3'
+                    elif 'бескрылка' in message.split(' '):
+                        qtype = '4'
+                    elif 'свояк' in message.split(' '):
+                        qtype = '5'
+                    elif 'эрудит-футбол' in message.split(' '):
+                        qtype = '6'
+                    else:
+                        qtype = '1'
+                    date = re.search('\d\d\d\d-\d\d-\d\d', message)
+                    if date != None:
+                        date = date.group(0)
+                    if date == None:
+                        date = '2010-01-01'
+                    # получаем вопрос, отправляем его сообщением
+                    question, pic = getquestion(event,qtype,date)
+                    if question != None:
+                        sendmessage(event,question,pic)
+                    # удаляем вопросы старше 1 дня (ибо лимит 10000 строк)
+                    currtime = int(time.time())
+                    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+                    cursor = conn.cursor()
+                    values = (currtime,)
+                    insert = 'DELETE FROM questions WHERE created < %s - 86400'
+                    cursor.execute(insert,values)
+                    conn.commit()
+                    cursor.close()
+                    conn.close()
+                # пользователь просит ответ, помечаем вопрос как отвеченный и отправляем ответ и комментарий
+                elif message == 'ответ':
+                    answer = getfromtab(event, 'answer')
+                    comment = getfromtab(event, 'qcomments')
+                    commentpic = getfromtab(event, 'commentpic')
+                    tabid = event.obj.message['peer_id']
+                    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+                    cursor = conn.cursor()
+                    values = (tabid,)
+                    insert = ('UPDATE questions SET answered = true WHERE tabid = %s')
+                    cursor.execute(insert, values)
+                    conn.commit()
+                    cursor.close()
+                    conn.close()
+                    if answer != None:
+                        sendmessage(event,answer)
+                    if comment != None:
+                        sendmessage(event,comment,commentpic)
+                # если вопрос отвечен, отправляем комментарий
+                elif message == 'комментарий':
+                    answered = getfromtab(event,'answered')
+                    if answered == True:
+                        comment = getfromtab(event, 'qcomments')
+                        commentpic = getfromtab(event, 'commentpic')
+                        if comment != None:
+                            sendmessage(event,comment,commentpic)
+                # отправляем автора
+                elif message == 'автор':    
+                    author = getfromtab(event,'author')
+                    if author != None:
+                        sendmessage(event,author)
+                # если вопрос отвечен, отправляем источник
+                elif message == 'источник':    
+                    answered = getfromtab(event,'answered')
+                    if answered == True:
+                        source = getfromtab(event,'sources')
+                        if '1. ' in source:
+                            source = re.split('\d\. ',source)
+                            while('' in source): 
+                                source.remove('') 
+                            source = "\n".join(source)
+                        if source != None:
+                            sendmessage(event,source)
+                # отправляем турнир
+                elif message == 'турнир':
+                    tour = getfromtab(event,'tour')
+                    if tour != None:
+                        sendmessage(event,tour)
+                # если строка начинается с "о ", проверяем ответ (чтобы не читать весь спам из бесед, ибо лагать же будет)
+                elif message.split(' ',1)[0] == 'о':
+                    answered = getfromtab(event,'answered')
+                    if answered == False:
+                        answercheck(event) 
+    except requests.exceptions.ReadTimeout as timeout:
+        continue
