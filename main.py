@@ -80,7 +80,7 @@ def getquestion(event,qtype='1', date = '2010-01-01'):
                     commentpic = commentpic.strip(' ')
                 else:
                     commentpic = re.search('\d\d\d\d\d\d\d\d.jpg',commentpic).group(0)
-                    commentpic = 'https://db.chgk.info/images/db/'+pic
+                    commentpic = 'https://db.chgk.info/images/db/'+commentpic
                 comment = comment[1]
         # текущее время
         currtime = int(time.time())
