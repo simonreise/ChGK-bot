@@ -336,6 +336,8 @@ while True:
                     if qtype == '5':
                         answer = re.split('\d{1,4}\. ', answer)
                         answer = answer[1].lower()
+                        if answer != None:
+                            sendmessage(event,answer)
                         onsianswer(event)
                     else:
                         comment = getfromtab(event, 'qcomments')
