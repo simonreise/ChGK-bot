@@ -260,7 +260,7 @@ def onsianswer(event):
     conn = psycopg2.connect(DATABASE_URL, sslmode='require')
     cursor = conn.cursor()
     values = (tabid,)
-    insert = ("UPDATE questions SET question = REPLACE(question, (REGEXP_MATCHES(question, '([0-9]{1,4}\.\s.*\s)+?[0-9]{1,4}\.'))[1], ''), answer = REPLACE(answer, (REGEXP_MATCHES(question, '([0-9]{1,4}\.\s.*\s)+?[0-9]{1,4}\.'))[1], '')WHERE tabid = %s")
+    insert = ("UPDATE questions SET question = (SELECT REPLACE(question, (REGEXP_MATCHES(question, '([0-9]{1,4}\.\s.*\s)+?[0-9]{1,4}\.'))[1], ''), answer = REPLACE(answer, (REGEXP_MATCHES(question, '([0-9]{1,4}\.\s.*\s)+?[0-9]{1,4}\.'))[1], '')) WHERE tabid = %s")
     cursor.execute(insert, values)
     conn.commit()
     cursor.close()
