@@ -254,7 +254,7 @@ def answercheck(event):
             cursor.close()
             conn.close()
 
-# эта функция удаляет из вопроса вопрос и ответ текущего номинала
+# эта функция удаляет из вопроса своей игры вопрос и ответ текущего номинала
 def onsianswer(event):
     tabid = event.obj.message['peer_id']
     conn = psycopg2.connect(DATABASE_URL, sslmode='require')
@@ -269,7 +269,7 @@ def onsianswer(event):
     if question != 'done':
         sinum = re.search(' \d\. ', question).group(0)
     question = re.split(' \d{1,4}\. ', question)
-    # если это вопрос за 50, то помечаем вопрос как отвеченный, иначе шлем вопрос следующего номинала
+    # перед вопросом за 50 убираем текст вопроса иначе шлем вопрос следующего номинала
     if len(question) == 2:
         question = "\n".join((question[0],"".join((sinum,question[1]))))
         if question != None:
@@ -277,12 +277,13 @@ def onsianswer(event):
         tabid = event.obj.message['peer_id']
         conn = psycopg2.connect(DATABASE_URL, sslmode='require')
         cursor = conn.cursor()
-        values = (tabid,)
-        insert = ('UPDATE questions SET question = "done" WHERE tabid = %s')
+        values = ('done',tabid)
+        insert = ('UPDATE questions SET question = %s WHERE tabid = %s')
         cursor.execute(insert, values)
         conn.commit()
         cursor.close()
         conn.close()
+    # 
     elif len(question) == 1:
         tabid = event.obj.message['peer_id']
         conn = psycopg2.connect(DATABASE_URL, sslmode='require')
