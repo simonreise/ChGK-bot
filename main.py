@@ -266,24 +266,33 @@ def onsianswer(event):
     cursor.close()
     conn.close()
     question = getfromtab(event,'question')
-    sinum = re.search(' \d\. ', question).group(0)
+    if question != 'done':
+        sinum = re.search(' \d\. ', question).group(0)
     question = re.split(' \d{1,4}\. ', question)
     # если это вопрос за 50, то помечаем вопрос как отвеченный, иначе шлем вопрос следующего номинала
     if len(question) == 2:
-        answered = getfromtab(event,'answered')
-        if answered == False:
-            tabid = event.obj.message['peer_id']
-            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-            cursor = conn.cursor()
-            values = (tabid,)
-            insert = ('UPDATE questions SET answered = true WHERE tabid = %s')
-            cursor.execute(insert, values)
-            conn.commit()
-            cursor.close()
-            conn.close()
-            question = "\n".join((question[0],"".join((sinum,question[1]))))
-            if question != None:
-                sendmessage(event,question)
+        question = "\n".join((question[0],"".join((sinum,question[1]))))
+        if question != None:
+            sendmessage(event,question)
+        tabid = event.obj.message['peer_id']
+        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+        cursor = conn.cursor()
+        values = (tabid,)
+        insert = ('UPDATE questions SET question = "done" WHERE tabid = %s')
+        cursor.execute(insert, values)
+        conn.commit()
+        cursor.close()
+        conn.close()
+    elif len(question) == 1:
+        tabid = event.obj.message['peer_id']
+        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+        cursor = conn.cursor()
+        values = (tabid,)
+        insert = ('UPDATE questions SET answered = true WHERE tabid = %s')
+        cursor.execute(insert, values)
+        conn.commit()
+        cursor.close()
+        conn.close()
     else:
         question = "\n".join((question[0],"".join((sinum,question[1]))))
         if question != None:
