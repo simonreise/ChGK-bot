@@ -240,6 +240,7 @@ def answercheck(event):
             answered = True
     # если ответ правильный, то обновляем соотв колонку в таблице и отправляем сообщение
     if answered == True:
+        sendmessage(event,'Ответ правильный!')
         if qtype == '5':
             onsianswer(event)
         else:
@@ -252,7 +253,6 @@ def answercheck(event):
             conn.commit()
             cursor.close()
             conn.close()
-        sendmessage(event,'Ответ правильный!')
 
 # эта функция удаляет из вопроса вопрос и ответ текущего номинала
 def onsianswer(event):
@@ -335,7 +335,7 @@ while True:
                     # если вопрос свояка, то 
                     if qtype == '5':
                         answer = re.split('\d{1,4}\. ', answer)
-                        answer = answersi[1].lower()
+                        answer = answer[1].lower()
                         onsianswer(event)
                     else:
                         comment = getfromtab(event, 'qcomments')
