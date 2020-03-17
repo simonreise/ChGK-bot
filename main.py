@@ -266,9 +266,10 @@ def onsianswer(event):
     cursor.close()
     conn.close()
     question = getfromtab(event,'question')
-    if question != 'done':
+    if question != None:
         sinum = re.search(' \d\. ', question).group(0)
-    question = re.split(' \d{1,4}\. ', question)
+    if question != None:
+        question = re.split(' \d{1,4}\. ', question)
     # перед вопросом за 50 убираем текст вопроса иначе шлем вопрос следующего номинала
     if len(question) == 2:
         question = "\n".join((question[0],"".join((sinum,question[1]))))
@@ -283,8 +284,8 @@ def onsianswer(event):
         conn.commit()
         cursor.close()
         conn.close()
-    # 
-    elif len(question) == 1:
+    # после вопроса за 50 помечаем вопрос как отвеченный
+    elif question == None:
         tabid = event.obj.message['peer_id']
         conn = psycopg2.connect(DATABASE_URL, sslmode='require')
         cursor = conn.cursor()
