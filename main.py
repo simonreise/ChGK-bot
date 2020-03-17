@@ -390,12 +390,12 @@ while True:
                     answered = getfromtab(event,'answered')
                     if answered == True:
                         source = getfromtab(event,'sources')
-                        if '1. ' in source:
-                            source = re.split('\d\. ',source)
-                            while('' in source): 
-                                source.remove('') 
-                            source = "\n".join(source)
                         if source != None:
+                            if '1. ' in source:
+                                source = re.split('\d\. ',source)
+                                while('' in source): 
+                                    source.remove('') 
+                                source = "\n".join(source)
                             sendmessage(event,source)
                 # отправляем турнир
                 elif message == 'турнир':
