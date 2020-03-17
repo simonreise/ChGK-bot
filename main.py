@@ -98,7 +98,7 @@ def getquestion(event,qtype='1', date = '2010-01-01'):
         cursor.close()
         conn.close()
         # Если вопрос свояка, обрезаем его до вопроса за 10
-        if qtype = '5':
+        if qtype == '5':
             sinum = re.search(' \d\. ', question).group(0)
             question = re.split(' \d{1,4}\. ', question)
             question = "\n".join((question[0],"".join((sinum,question[1]))))
@@ -177,7 +177,7 @@ def answercheck(event):
     answers.append(getfromtab(event,'answer'))
     # если вопрос свояка, берем первый ответ
     qtype = getfromtab(event,'qtype')
-    if qtype = '5':
+    if qtype == '5':
         answersi = answers[0]
         answersi = re.split('\d{1,4}\. ', answersi)
         answersi = answersi[1].lower()
