@@ -183,7 +183,7 @@ def answercheck(event):
         answersi = answersi[1].lower()
         answersi = answersi.replace('ё','е')
         # извлекаем критерии зачета
-        passcrsi = re.split('зачет',answer,maxsplit = 1)[1]
+        passcrsi = re.split('зачет',answersi,maxsplit = 1)[1]
         passcrsi = passcrsi.strip(':\]\}). ')
         passcrsi = re.split('; |, ', passcrsi)
         # удаляем информацию в скобочках
