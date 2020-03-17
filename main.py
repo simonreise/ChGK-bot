@@ -91,12 +91,17 @@ def getquestion(event,qtype='1', date = '2010-01-01'):
         # записываем полученные данные в БД
         conn = psycopg2.connect(DATABASE_URL, sslmode='require')
         cursor = conn.cursor()
-        values = (tabid, question, pic, answer, passcr, author, comment, commentpic, resource, tour, currtime, answered, question, pic, answer, passcr, author, comment, commentpic, resource, tour, currtime, answered)
-        insert = ('INSERT INTO questions (tabid, question, pic, answer, pass, author, qcomments, commentpic, sources, tour, created, answered) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (tabid) DO UPDATE SET question = %s, pic = %s, answer = %s, pass = %s, author = %s, qcomments = %s, commentpic = %s, sources = %s, tour = %s, created = %s, answered = %s')
+        values = (tabid, question, pic, answer, passcr, author, comment, commentpic, resource, tour, currtime, answered, qtype, question, pic, answer, passcr, author, comment, commentpic, resource, tour, currtime, answered, qtype)
+        insert = ('INSERT INTO questions (tabid, question, pic, answer, pass, author, qcomments, commentpic, sources, tour, created, answered, qtype) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (tabid) DO UPDATE SET question = %s, pic = %s, answer = %s, pass = %s, author = %s, qcomments = %s, commentpic = %s, sources = %s, tour = %s, created = %s, answered = %s, qtype = %s')
         cursor.execute(insert, values)
         conn.commit()
         cursor.close()
         conn.close()
+        # Если вопрос свояка, обрезаем его до вопроса за 10
+        if qtype = '5':
+            sinum = re.search(' \d\. ', question).group(0)
+            question = re.split(' \d{1,4}\. ', question)
+            question = "\n".join((question[0],"".join((sinum,question[1]))))
     else:
         question = None
         pic = None
@@ -137,6 +142,8 @@ def getfromtab(event,what):
         insert = ('SELECT answer FROM questions WHERE tabid = %s LIMIT 1')
     elif what == 'pass':
         insert = ('SELECT pass FROM questions WHERE tabid = %s LIMIT 1')
+    elif what == 'qtype':
+        insert = ('SELECT qtype FROM questions WHERE tabid = %s LIMIT 1')
     elif what == 'author':
         insert = ('SELECT author FROM questions WHERE tabid = %s LIMIT 1')
     elif what == 'qcomments':
@@ -151,8 +158,6 @@ def getfromtab(event,what):
         insert = ('SELECT created FROM questions WHERE tabid = %s LIMIT 1')
     elif what == 'answered':
         insert = ('SELECT answered FROM questions WHERE tabid = %s LIMIT 1')
-    elif what == 'ischat':
-        insert = ('SELECT ischat FROM questions WHERE tabid = %s LIMIT 1')
     elif what == 'tabid':
         insert = ('SELECT tabid FROM questions WHERE tabid = %s LIMIT 1')
     cursor.execute(insert, values)
@@ -170,6 +175,22 @@ def answercheck(event):
     answers = []
     # получаем ответ из БД
     answers.append(getfromtab(event,'answer'))
+    # если вопрос свояка, берем первый ответ
+    qtype = getfromtab(event,'qtype')
+    if qtype = '5':
+        answersi = answers[0]
+        answersi = re.split('\d{1,4}\. ', answersi)
+        answersi = answersi[1].lower()
+        answersi = answersi.replace('ё','е')
+        # извлекаем критерии зачета
+        passcrsi = re.split('зачет',answer,maxsplit = 1)[1]
+        passcrsi = passcrsi.strip(':\]\}). ')
+        passcrsi = re.split('; |, ', passcrsi)
+        # удаляем информацию в скобочках
+        answersi = re.sub("[\[\{(].*?[\]\})]", "",answersi)
+        answers[0] = answersi
+        for pcr in passcrsi:
+            answers.append(pcr)
     # получаем зачет из бд
     passcr = getfromtab(event,'pass')
     # разбиваем зачет на отдельные варианты по , или ;
@@ -186,6 +207,7 @@ def answercheck(event):
         answer = answer.replace('"','')
         answer = answer.replace(',','')
         answer = answer.replace('.','')
+        answer = answer.replace(';','')
         answer = answer.lower()
         answer = answer.replace('ё','е')
         if 'незачет' in answer:
@@ -205,6 +227,7 @@ def answercheck(event):
     userans = userans.replace('"','')
     userans = userans.replace(',','')
     userans = userans.replace('.','')
+    userans = userans.replace(';','')
     userans = userans.replace('ё','е')
     # удаляем все вариации из пользовательского ответа
     for variation in variations:
@@ -216,6 +239,36 @@ def answercheck(event):
             answered = True
     # если ответ правильный, то обновляем соотв колонку в таблице и отправляем сообщение
     if answered == True:
+        if qtype == '5':
+            onsianswer(event)
+        else:
+            tabid = event.obj.message['peer_id']
+            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+            cursor = conn.cursor()
+            values = (tabid,)
+            insert = ('UPDATE questions SET answered = true WHERE tabid = %s')
+            cursor.execute(insert, values)
+            conn.commit()
+            cursor.close()
+            conn.close()
+        sendmessage(event,'Ответ правильный!')
+
+# эта функция удаляет из вопроса вопрос и ответ текущего номинала
+def onsianswer(event):
+    tabid = event.obj.message['peer_id']
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cursor = conn.cursor()
+    values = (tabid,)
+    insert = ("UPDATE questions SET question = REPLACE(question, (REGEXP_MATCHES(question, '([0-9]{1,4}\.\s.*\s)+?[0-9]{1,4}\.'))[1], ''), answer = REPLACE(answer, (REGEXP_MATCHES(question, '([0-9]{1,4}\.\s.*\s)+?[0-9]{1,4}\.'))[1], '')WHERE tabid = %s")
+    cursor.execute(insert, values)
+    conn.commit()
+    cursor.close()
+    conn.close()
+    question = getfromtab(event,'question')
+    sinum = re.search(' \d\. ', question).group(0)
+    question = re.split(' \d{1,4}\. ', question)
+    # если это вопрос за 50, то помечаем вопрос как отвеченный, иначе шлем вопрос следующего номинала
+    if len(question) == 2:
         tabid = event.obj.message['peer_id']
         conn = psycopg2.connect(DATABASE_URL, sslmode='require')
         cursor = conn.cursor()
@@ -225,8 +278,12 @@ def answercheck(event):
         conn.commit()
         cursor.close()
         conn.close()
-        sendmessage(event,'Ответ правильный!')
+    else:
+        question = "\n".join((question[0],"".join((sinum,question[1]))))
+        if question != None:
+            sendmessage(event,question)
     
+
 # ждем сообщений
 while True:
     longpoll = VkBotLongPoll(vk_session, '192574160')
@@ -272,22 +329,29 @@ while True:
                     conn.close()
                 # пользователь просит ответ, помечаем вопрос как отвеченный и отправляем ответ и комментарий
                 elif message == 'ответ':
+                    qtype = getfromtab(event, 'qtype')
                     answer = getfromtab(event, 'answer')
-                    comment = getfromtab(event, 'qcomments')
-                    commentpic = getfromtab(event, 'commentpic')
-                    tabid = event.obj.message['peer_id']
-                    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-                    cursor = conn.cursor()
-                    values = (tabid,)
-                    insert = ('UPDATE questions SET answered = true WHERE tabid = %s')
-                    cursor.execute(insert, values)
-                    conn.commit()
-                    cursor.close()
-                    conn.close()
-                    if answer != None:
-                        sendmessage(event,answer)
-                    if comment != None:
-                        sendmessage(event,comment,commentpic)
+                    # если вопрос свояка, то 
+                    if qtype == '5':
+                        answer = re.split('\d{1,4}\. ', answer)
+                        answer = answersi[1].lower()
+                        onsianswer(event)
+                    else:
+                        comment = getfromtab(event, 'qcomments')
+                        commentpic = getfromtab(event, 'commentpic')
+                        tabid = event.obj.message['peer_id']
+                        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+                        cursor = conn.cursor()
+                        values = (tabid,)
+                        insert = ('UPDATE questions SET answered = true WHERE tabid = %s')
+                        cursor.execute(insert, values)
+                        conn.commit()
+                        cursor.close()
+                        conn.close()
+                        if answer != None:
+                            sendmessage(event,answer)
+                        if comment != None:
+                            sendmessage(event,comment,commentpic)
                 # если вопрос отвечен, отправляем комментарий
                 elif message == 'комментарий':
                     answered = getfromtab(event,'answered')
