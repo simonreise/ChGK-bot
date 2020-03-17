@@ -261,7 +261,6 @@ def onsianswer(event):
     cursor = conn.cursor()
     values = (tabid,)
     insert = ("UPDATE questions SET question = (SELECT REPLACE(question, (REGEXP_MATCHES(question, '([0-9]{1,4}\.\s.*\s)+?[0-9]{1,4}\.'))[1], '')), answer = (SELECT REPLACE(answer, (REGEXP_MATCHES(answer, '([0-9]{1,4}\.\s.*\s)+?[0-9]{1,4}\.'))[1], '')) WHERE tabid = %s")
-    UPDATE questions SET question = (SELECT REPLACE(question, (REGEXP_MATCHES(question, '([0-9]{1,4}\.\s.*\s)+?[0-9]{1,4}\.'))[1], '')) WHERE tabid = 
     cursor.execute(insert, values)
     conn.commit()
     cursor.close()
