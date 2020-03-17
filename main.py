@@ -270,8 +270,19 @@ def onsianswer(event):
         sinum = re.search(' \d\. ', question).group(0)
     if question != None:
         question = re.split(' \d{1,4}\. ', question)
+    # после вопроса за 50 помечаем вопрос как отвеченный
+    if question == None:
+        tabid = event.obj.message['peer_id']
+        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+        cursor = conn.cursor()
+        values = (tabid,)
+        insert = ('UPDATE questions SET answered = true WHERE tabid = %s')
+        cursor.execute(insert, values)
+        conn.commit()
+        cursor.close()
+        conn.close()
     # перед вопросом за 50 убираем текст вопроса иначе шлем вопрос следующего номинала
-    if len(question) == 2:
+    elif len(question) == 2:
         question = "\n".join((question[0],"".join((sinum,question[1]))))
         if question != None:
             sendmessage(event,question)
@@ -284,17 +295,7 @@ def onsianswer(event):
         conn.commit()
         cursor.close()
         conn.close()
-    # после вопроса за 50 помечаем вопрос как отвеченный
-    elif question == None:
-        tabid = event.obj.message['peer_id']
-        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-        cursor = conn.cursor()
-        values = (tabid,)
-        insert = ('UPDATE questions SET answered = true WHERE tabid = %s')
-        cursor.execute(insert, values)
-        conn.commit()
-        cursor.close()
-        conn.close()
+    # иначе возвращаем текст вопроса
     else:
         question = "\n".join((question[0],"".join((sinum,question[1]))))
         if question != None:
