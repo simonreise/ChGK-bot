@@ -270,15 +270,20 @@ def onsianswer(event):
     question = re.split(' \d{1,4}\. ', question)
     # если это вопрос за 50, то помечаем вопрос как отвеченный, иначе шлем вопрос следующего номинала
     if len(question) == 2:
-        tabid = event.obj.message['peer_id']
-        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-        cursor = conn.cursor()
-        values = (tabid,)
-        insert = ('UPDATE questions SET answered = true WHERE tabid = %s')
-        cursor.execute(insert, values)
-        conn.commit()
-        cursor.close()
-        conn.close()
+        answered = getfromtab(event,'answered')
+        if answered == False:
+            tabid = event.obj.message['peer_id']
+            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+            cursor = conn.cursor()
+            values = (tabid,)
+            insert = ('UPDATE questions SET answered = true WHERE tabid = %s')
+            cursor.execute(insert, values)
+            conn.commit()
+            cursor.close()
+            conn.close()
+            question = "\n".join((question[0],"".join((sinum,question[1]))))
+            if question != None:
+                sendmessage(event,question)
     else:
         question = "\n".join((question[0],"".join((sinum,question[1]))))
         if question != None:
@@ -332,7 +337,7 @@ while True:
                 elif message == 'ответ':
                     qtype = getfromtab(event, 'qtype')
                     answer = getfromtab(event, 'answer')
-                    # если вопрос свояка, то 
+                    # если вопрос свояка, то обрезаем ответ и просим следующий вопрос
                     if qtype == '5':
                         answer = re.split('\d{1,4}\. ', answer)
                         answer = answer[1].lower()
