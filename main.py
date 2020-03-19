@@ -100,7 +100,7 @@ def getquestion(event,qtype='1', date = '2010-01-01'):
         # Если вопрос свояка, обрезаем его до вопроса за 10
         if qtype == '5':
             sinum = re.search(' \d\. ', question).group(0)
-            question = re.split(' \d{1,4}\. ', question)
+            question = re.split(' \d{1,3}\. ', question)
             question = "\n".join((question[0],"".join((sinum,question[1]))))
     else:
         question = None
@@ -179,7 +179,7 @@ def answercheck(event):
     qtype = getfromtab(event,'qtype')
     if qtype == '5':
         answersi = answers[0]
-        answersi = re.split('\d{1,4}\. ', answersi)
+        answersi = re.split('\d{1,3}\. ', answersi)
         answersi = answersi[1].lower()
         answersi = answersi.replace('ё','е')
         # извлекаем критерии зачета
@@ -269,7 +269,7 @@ def onsianswer(event):
     if question != None:
         sinum = re.search(' \d\. ', question).group(0)
     if question != None:
-        question = re.split(' \d{1,4}\. ', question)
+        question = re.split(' \d{1,3}\. ', question)
     # после вопроса за 50 помечаем вопрос как отвеченный
     if question == None:
         tabid = event.obj.message['peer_id']
@@ -351,7 +351,7 @@ while True:
                     answer = getfromtab(event, 'answer')
                     # если вопрос свояка, то обрезаем ответ и просим следующий вопрос
                     if qtype == '5':
-                        answer = re.split('\d{1,4}\. ', answer)
+                        answer = re.split('\d{1,3}\. ', answer)
                         answer = answer[1].lower()
                         if answer != None:
                             sendmessage(event,answer)
