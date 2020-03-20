@@ -4,6 +4,7 @@ import requests
 import time
 import sched
 import json
+import difflib
 from xml.etree import ElementTree
 import psycopg2
 from psycopg2 import sql
@@ -236,7 +237,7 @@ def answercheck(event):
         userans = re.sub(variation, "",userans)
     # сравниваем ответ пользователя со всеми ответами
     for answer in answers:
-        if userans == answer:
+        if difflib.SequenceMatcher(None,userans,answer).ratio()>=0.75:
             answered = True
     # если ответ правильный, то обновляем соотв колонку в таблице и отправляем сообщение
     if answered == True:
