@@ -237,7 +237,7 @@ def answercheck(event):
         userans = re.sub(variation, "",userans)
     # сравниваем ответ пользователя со всеми ответами
     for answer in answers:
-        if difflib.SequenceMatcher(None,userans,answer).ratio()>=0.75:
+        if difflib.SequenceMatcher(None,userans,answer).ratio()>=0.7:
             answered = True
     # если ответ правильный, то обновляем соотв колонку в таблице и отправляем сообщение
     if answered == True:
@@ -404,7 +404,7 @@ while True:
                     if tour != None:
                         sendmessage(event,tour)
                 # если строка начинается с "о ", проверяем ответ (чтобы не читать весь спам из бесед, ибо лагать же будет)
-                elif message.split(' ',1)[0] == 'о':
+                elif message.split(' ',1)[0] == 'о' and message.strip(' ') != 'о':
                     answered = getfromtab(event,'answered')
                     if answered == False:
                         answercheck(event) 
