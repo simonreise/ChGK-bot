@@ -202,7 +202,7 @@ def answercheck(event):
         answersi = answersi.replace('ё','е')
         # извлекаем критерии зачета
         if 'зачет' in answersi:
-            passcrsi = re.split('зачет',answersi,maxsplit = 1)[1]
+            answersi, passcrsi = re.split('зачет',answersi,maxsplit = 1)
             passcrsi = passcrsi.strip(':\]\}). ')
             passcrsi = re.split('; |, ', passcrsi)
             for pcr in passcrsi:
