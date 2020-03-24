@@ -101,7 +101,7 @@ def getquestion(event,qtype='1', date = '2010-01-01'):
         # Если вопрос свояка, обрезаем его до вопроса за 10
         if qtype == '5':
             sinum = re.search(' \d\. ', question).group(0)
-            question = re.split(' \d{1,3}\. ', question)
+            question = re.split(' [1,2,3,4,5]\. ', question)
             question = "\n".join((question[0],"".join((sinum,question[1]))))
     else:
         question = None
@@ -180,7 +180,7 @@ def answercheck(event):
     qtype = getfromtab(event,'qtype')
     if qtype == '5':
         answersi = answers[0]
-        answersi = re.split('\d{1,3}\. ', answersi)
+        answersi = re.split('[1,2,3,4,5]\. ', answersi)
         answersi = answersi[1].lower()
         answersi = answersi.replace('ё','е')
         # извлекаем критерии зачета
@@ -261,16 +261,18 @@ def onsianswer(event):
     conn = psycopg2.connect(DATABASE_URL, sslmode='require')
     cursor = conn.cursor()
     values = (tabid,)
-    insert = ("UPDATE questions SET question = (SELECT REPLACE(question, (REGEXP_MATCHES(question, '([0-9]{1,4}\.\s.*\s)+?[0-9]{1,4}\.'))[1], '')), answer = (SELECT REPLACE(answer, (REGEXP_MATCHES(answer, '([0-9]{1,4}\.\s.*\s)+?[0-9]{1,4}\.'))[1], '')) WHERE tabid = %s")
+    insert = ("UPDATE questions SET question = (SELECT REPLACE(question, (REGEXP_MATCHES(question, '([1,2,3,4,5]\.\s.*\s)+?[1,2,3,4,5]\.'))[1], '')), answer = (SELECT REPLACE(answer, (REGEXP_MATCHES(answer, '([1,2,3,4,5]\.\s.*\s)+?[1,2,3,4,5]\.'))[1], '')) WHERE tabid = %s")
     cursor.execute(insert, values)
     conn.commit()
     cursor.close()
     conn.close()
     question = getfromtab(event,'question')
     if question != None:
-        sinum = re.search(' \d\. ', question).group(0)
+        sinum = re.search(' \d\. ', question)
+        if sinum != None:
+            sinum = sinum.group(0)
     if question != None:
-        question = re.split(' \d{1,3}\. ', question)
+        question = re.split(' [1,2,3,4,5]\. ', question)
     # после вопроса за 50 помечаем вопрос как отвеченный
     if question == None:
         tabid = event.obj.message['peer_id']
@@ -352,11 +354,12 @@ while True:
                     answer = getfromtab(event, 'answer')
                     # если вопрос свояка, то обрезаем ответ и просим следующий вопрос
                     if qtype == '5':
-                        answer = re.split('\d{1,3}\. ', answer)
-                        answer = answer[1].lower()
                         if answer != None:
-                            sendmessage(event,answer)
-                        onsianswer(event)
+                            answer = re.split('[1,2,3,4,5]\. ', answer)
+                            answer = answer[1].lower()
+                            if answer != None:
+                                sendmessage(event,answer)
+                            onsianswer(event)
                     else:
                         comment = getfromtab(event, 'qcomments')
                         commentpic = getfromtab(event, 'commentpic')
