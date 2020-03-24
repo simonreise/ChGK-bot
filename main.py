@@ -89,6 +89,24 @@ def getquestion(event,qtype='1', date = '2010-01-01'):
         tabid = event.obj.message['peer_id']
         # по дефолту вопрос не отвечен))
         answered = False
+        # заменяем номера вопросов на &&&
+        if qtype == '5':
+            tag = re.search('1\d{0,1}\. ',question).group(0)
+            qnum = int(re.search('1\d{0,1}',tag).group(0))
+            question.replace(tag, '&&&'+str(qnum)+'. ', 1)
+            answer.replace(tag, '&&&'+' ', 1)
+            if qnum == 10:
+                ten = True
+            else:
+                ten = False
+            for 12:
+                if ten == True:
+                    qnum += 10
+                else:
+                    qnum +=1
+                tag = ' '+str(qnum)+'. '
+                question.replace(tag, ' &&&'+str(qnum)+'. ', 1)
+                answer.replace(tag, ' &&& ', 1)
         # записываем полученные данные в БД
         conn = psycopg2.connect(DATABASE_URL, sslmode='require')
         cursor = conn.cursor()
@@ -100,9 +118,8 @@ def getquestion(event,qtype='1', date = '2010-01-01'):
         conn.close()
         # Если вопрос свояка, обрезаем его до вопроса за 10
         if qtype == '5':
-            sinum = re.search(' \d\. ', question).group(0)
-            question = re.split(' [1,2,3,4,5]\. ', question)
-            question = "\n".join((question[0],"".join((sinum,question[1]))))
+            question = re.split('&&&', question)
+            question = "\n".join((question[0],question[1]))
     else:
         question = None
         pic = None
@@ -180,7 +197,7 @@ def answercheck(event):
     qtype = getfromtab(event,'qtype')
     if qtype == '5':
         answersi = answers[0]
-        answersi = re.split('[1,2,3,4,5]\. ', answersi)
+        answersi = re.split('&&&', answersi)
         answersi = answersi[1].lower()
         answersi = answersi.replace('ё','е')
         # извлекаем критерии зачета
@@ -261,18 +278,14 @@ def onsianswer(event):
     conn = psycopg2.connect(DATABASE_URL, sslmode='require')
     cursor = conn.cursor()
     values = (tabid,)
-    insert = ("UPDATE questions SET question = (SELECT REPLACE(question, (REGEXP_MATCHES(question, '([1,2,3,4,5]\.\s.*\s)+?[1,2,3,4,5]\.'))[1], '')), answer = (SELECT REPLACE(answer, (REGEXP_MATCHES(answer, '([1,2,3,4,5]\.\s.*\s)+?[1,2,3,4,5]\.'))[1], '')) WHERE tabid = %s")
+    insert = ("UPDATE questions SET question = (SELECT REPLACE(question, (REGEXP_MATCHES(question, '(&&&.*\s)+?&&&'))[1], '')), answer = (SELECT REPLACE(answer, (REGEXP_MATCHES(answer, '(&&&.*\s)+?&&&'))[1], '')) WHERE tabid = %s")
     cursor.execute(insert, values)
     conn.commit()
     cursor.close()
     conn.close()
     question = getfromtab(event,'question')
     if question != None:
-        sinum = re.search(' \d\. ', question)
-        if sinum != None:
-            sinum = sinum.group(0)
-    if question != None:
-        question = re.split(' [1,2,3,4,5]\. ', question)
+        question = re.split('&&&', question)
     # после вопроса за 50 помечаем вопрос как отвеченный
     if question == None:
         tabid = event.obj.message['peer_id']
@@ -286,7 +299,7 @@ def onsianswer(event):
         conn.close()
     # перед вопросом за 50 убираем текст вопроса иначе шлем вопрос следующего номинала
     elif len(question) == 2:
-        question = "\n".join((question[0],"".join((sinum,question[1]))))
+        question = "\n".join((question[0],question[1]))
         if question != None:
             sendmessage(event,question)
         tabid = event.obj.message['peer_id']
@@ -300,7 +313,7 @@ def onsianswer(event):
         conn.close()
     # иначе возвращаем текст вопроса
     else:
-        question = "\n".join((question[0],"".join((sinum,question[1]))))
+        question = "\n".join((question[0],question[1]))
         if question != None:
             sendmessage(event,question)
     
@@ -355,7 +368,7 @@ while True:
                     # если вопрос свояка, то обрезаем ответ и просим следующий вопрос
                     if qtype == '5':
                         if answer != None:
-                            answer = re.split('[1,2,3,4,5]\. ', answer)
+                            answer = re.split('&&&', answer)
                             answer = answer[1].lower()
                             if answer != None:
                                 sendmessage(event,answer)
