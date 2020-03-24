@@ -93,8 +93,8 @@ def getquestion(event,qtype='1', date = '2010-01-01'):
         if qtype == '5':
             tag = re.search('1\d{0,1}\. ',question).group(0)
             qnum = int(re.search('1\d{0,1}',tag).group(0))
-            question.replace(tag, '&&&'+str(qnum)+'. ', 1)
-            answer.replace(tag, '&&&'+' ', 1)
+            question = question.replace(tag, '&&&'+str(qnum)+'. ', 1)
+            answer = answer.replace(tag, '&&&'+' ', 1)
             if qnum == 10:
                 ten = True
             else:
@@ -105,8 +105,8 @@ def getquestion(event,qtype='1', date = '2010-01-01'):
                 else:
                     qnum +=1
                 tag = ' '+str(qnum)+'. '
-                question.replace(tag, ' &&&'+str(qnum)+'. ', 1)
-                answer.replace(tag, ' &&& ', 1)
+                question = question.replace(tag, ' &&&'+str(qnum)+'. ', 1)
+                answer = answer.replace(tag, ' &&& ', 1)
         # записываем полученные данные в БД
         conn = psycopg2.connect(DATABASE_URL, sslmode='require')
         cursor = conn.cursor()
