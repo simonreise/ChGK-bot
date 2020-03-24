@@ -99,7 +99,7 @@ def getquestion(event,qtype='1', date = '2010-01-01'):
                 ten = True
             else:
                 ten = False
-            for 12:
+            for x in range(13):
                 if ten == True:
                     qnum += 10
                 else:
