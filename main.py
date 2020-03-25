@@ -93,7 +93,7 @@ def getquestion(event,qtype='1', date = '2010-01-01'):
         answered = False
         # заменяем номера вопросов на &&&
         if qtype == '5':
-            tag = re.search('1\d{0,1}\. ',question).group(0)
+            tag = re.search(' 10{0,1}\. ',question).group(0)
             qnum = int(re.search('1\d{0,1}',tag).group(0))
             question = question.replace(tag, '&&&'+str(qnum)+'. ', 1)
             answer = answer.replace(tag, '&&&'+' ', 1)
