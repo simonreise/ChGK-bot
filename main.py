@@ -64,25 +64,27 @@ def getquestion(event,qtype='1', date = '2010-01-01'):
         pic = None
         commentpic = None
         if question != None:
-            if re.search('\(pic: ',question) != None:
-                question = re.split('\)',question, maxsplit = 1)
-                pic = re.split(':',question[0], maxsplit = 1)[1]
+            if '(pic: ' in question:
+                pic = re.search('\(pic:.*?\)', question).group(0)
+                question = re.sub(pic.replace('(', '\(').replace(')','\)'), '', question)
+                pic = re.split(':',pic, maxsplit = 1)[1]
+                pic = pic.strip('() ')
                 if 'http' in pic:
                     pic = pic.strip(' ')
                 else:
                     pic = re.search('\d\d\d\d\d\d\d\d.jpg',pic).group(0)
                     pic = 'https://db.chgk.info/images/db/' + pic
-                question = question[1]
         if comment != None:
-            if re.search('\(pic: ',comment) != None:
-                comment = re.split('\)',comment, maxsplit = 1)
-                commentpic = re.split(':',comment[0], maxsplit = 1)[1]
+            if '(pic: ' in comment:
+                commentpic = re.search('\(pic:.*?\)', comment).group(0)
+                comment = re.sub(commentpic.replace('(', '\(').replace(')','\)'), '', comment)
+                commentpic = re.split(':',comment, maxsplit = 1)[1]
+                commentpic = commentpic.strip('() ')
                 if 'http' in commentpic:
                     commentpic = commentpic.strip(' ')
                 else:
                     commentpic = re.search('\d\d\d\d\d\d\d\d.jpg',commentpic).group(0)
                     commentpic = 'https://db.chgk.info/images/db/'+commentpic
-                comment = comment[1]
         # текущее время
         currtime = int(time.time())
         # узнаем чат или диалог и записываем id
@@ -128,18 +130,23 @@ def getquestion(event,qtype='1', date = '2010-01-01'):
 # эта функция посылает сообщение в чат ивента с текстом и картинкой из аргументов
 def sendmessage(event,text,pic=None):
     if pic != None:
-        upload = VkUpload(vk_session)
-        image_url = pic
-        image = session.get(image_url, stream=True)
-        photo = upload.photo_messages(photos=image.raw)[0]
-        attach='photo{}_{}'.format(photo['owner_id'], photo['id'])
-        vk.messages.send(
-            peer_id = event.obj.message['peer_id'],
-            random_id=get_random_id(),
-            attachment=attach,
-            message=text
-            )
-    else:
+        # это на случай, если возникнет ошибка с загрузкой картинки. да, они иногда возникают, но очень редко
+        try:
+            upload = VkUpload(vk_session)
+            image_url = pic
+            image = session.get(image_url, stream=True)
+            photo = upload.photo_messages(photos=image.raw)[0]
+            attach='photo{}_{}'.format(photo['owner_id'], photo['id'])
+            vk.messages.send(
+                peer_id = event.obj.message['peer_id'],
+                random_id=get_random_id(),
+                attachment=attach,
+                message=text
+                )
+        except:
+            print(pic)
+            pic = None
+    if pic == None:
         vk.messages.send(
             peer_id = event.obj.message['peer_id'],
             random_id=get_random_id(),
@@ -271,6 +278,8 @@ def answercheck(event):
             conn.commit()
             cursor.close()
             conn.close()
+    elif answered == False:
+        sendmessage(event,'Увы, ответ неправильный.')
 
 # эта функция удаляет из вопроса своей игры вопрос и ответ текущего номинала
 def onsianswer(event):
