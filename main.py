@@ -107,8 +107,9 @@ def getquestion(event,qtype='1', date = '2010-01-01'):
                 else:
                     qnum +=1
                 tag = ' '+str(qnum)+'. '
-                question = question.replace(tag, ' &&&'+str(qnum)+'. ', 1)
-                answer = answer.replace(tag, ' &&& ', 1)
+                if tag in answer.split('&&&')[-1]:
+                    question = question.replace(tag, ' &&&'+str(qnum)+'. ', 1)
+                    answer = answer.replace(tag, ' &&& ', 1)
         # записываем полученные данные в БД
         conn = psycopg2.connect(DATABASE_URL, sslmode='require')
         cursor = conn.cursor()
