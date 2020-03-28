@@ -216,7 +216,7 @@ def answercheck(event):
             for pcr in passcrsi:
                 answers.append(pcr)
         # удаляем информацию в скобочках
-        answersi = re.sub("[\[\{(].*?[\]\})]", "",answersi)
+        answersi = re.sub("[\{(].*?[\})]", "",answersi)
         answers[0] = answersi
     # получаем зачет из бд
     passcr = getfromtab(event,'pass')
