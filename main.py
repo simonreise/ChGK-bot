@@ -379,7 +379,7 @@ while True:
                         date = '2010-01-01'
                     # если надо искать вопрос на определенную тематику - ищем
                     search = message.split(' ',1)[1]
-                    search = search..strip('." ')
+                    search = search.strip('." ')
                     search = search.replace('"','')
                     search = search.lower()
                     search = search.replace('ё','е')
