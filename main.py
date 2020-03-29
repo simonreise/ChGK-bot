@@ -35,7 +35,7 @@ def getquestion(event,qtype='1', date = '2010-01-01', search = None):
     # если игрок хочет получить вопрос через поиск
     if search != None:
         # получаем 1000 вопросов по данному запросу (больше база получить не позволяет)
-        url = 'https://db.chgk.info/xml/search/questions/from_'+date+'/types'+qtype+'/limit1000/'+search+'/
+        url = 'https://db.chgk.info/xml/search/questions/from_'+date+'/types'+qtype+'/limit1000/'+search
         questionxml = requests.get(url)
         questionxml = ElementTree.fromstring(questionxml.content)
         if questionxml.findall('./question/Question') == []:
