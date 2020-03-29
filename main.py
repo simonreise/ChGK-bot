@@ -31,33 +31,46 @@ vk = vk_session.get_api()
 # аргументы: 
 # qtype - тип вопроса (чгк, свояк и т.д.), по умолчанию чгк; 
 # date - с какой даты получать вопросы (чтобы отбросить разное а-ля чгк 90-х
-def getquestion(event,qtype='1', date = '2010-01-01'):
-    # собираем URL из аргументов
-    url = 'https://db.chgk.info/xml/random/from_'+date+'/types'+qtype+'/limit1/'
-    # получаем xml
-    questionxml = requests.get(url)
-    questionxml = ElementTree.fromstring(questionxml.content)
+def getquestion(event,qtype='1', date = '2010-01-01', search = None):
+    # если игрок хочет получить вопрос через поиск
+    if search != None:
+        # получаем 1000 вопросов по данному запросу (больше база получить не позволяет)
+        url = 'https://db.chgk.info/xml/search/questions/from_'+date+'/types'+qtype+'/limit1000/'+search+'/
+        questionxml = requests.get(url)
+        questionxml = ElementTree.fromstring(questionxml.content)
+        if questionxml.findall('./question/Question') == []:
+            return 'Увы, по вашему запросу ничего не найдено.', None
+        # выбираем случайный вопрос
+        qnumber = random.randint(0,len(questionxml.findall('./question/Question'))-1)
+    # если игрок хочет получить случайный вопрос
+    else:
+        # собираем URL из аргументов
+        url = 'https://db.chgk.info/xml/random/from_'+date+'/types'+qtype+'/limit1/'
+        # получаем xml
+        questionxml = requests.get(url)
+        questionxml = ElementTree.fromstring(questionxml.content)
+        qnumber = 0
     # извлекаем из xml вопрос, ответ, комментарий, автора, зачет, источник, турнир
-    if questionxml.find('./question/Question') != None:
-        question = questionxml.find('./question/Question').text
+    if questionxml.findall('./question/Question')[qnumber] != None:
+        question = questionxml.findall('./question/Question')[qnumber].text
         if question != None:
             question = question.replace('\n',' ')
-        answer = questionxml.find('./question/Answer').text
+        answer = questionxml.findall('./question/Answer')[qnumber].text
         if answer != None:
             answer = answer.replace('\n',' ')
-        comment = questionxml.find('./question/Comments').text
+        comment = questionxml.findall('./question/Comments')[qnumber].text
         if comment != None:
             comment = comment.replace('\n',' ')
-        author = questionxml.find('./question/Authors').text
+        author = questionxml.findall('./question/Authors')[qnumber].text
         if author != None:
             author = author.replace('\n',' ')
-        passcr = questionxml.find('./question/PassCriteria').text
+        passcr = questionxml.findall('./question/PassCriteria')[qnumber].text
         if passcr != None:
             passcr = passcr.replace('\n',' ')
-        resource = questionxml.find('./question/Sources').text
+        resource = questionxml.findall('./question/Sources')[qnumber].text
         if resource != None:
             resource = resource.replace('\n',' ')
-        tour = questionxml.find('./question/tournamentTitle').text
+        tour = questionxml.findall('./question/tournamentTitle')[qnumber].text
         if tour != None:
             tour = tour.replace('\n',' ')
         # получаем URL раздатки-картинки из вопроса и комментария если есть
@@ -340,25 +353,40 @@ while True:
                     # определяем тип вопроса и дату, по умолчанию - чгк и 2010-01-01
                     if 'чгк' in message.split(' '):
                         qtype = '1'
+                        message = message.replace('чгк','',1)
                     elif 'брейн' in message.split(' '):
                         qtype = '2'
+                        message = message.replace('брейн','',1)
                     elif 'интернет-турнир' in message.split(' '):
                         qtype = '3'
+                        message = message.replace('интернет-турнир','',1)
                     elif 'бескрылка' in message.split(' '):
                         qtype = '4'
+                        message = message.replace('бескрылка','',1)
                     elif 'свояк' in message.split(' '):
                         qtype = '5'
+                        message = message.replace('свояк','',1)
                     elif 'эрудит-футбол' in message.split(' '):
                         qtype = '6'
+                        message = message.replace('эрудит-футбол','',1)
                     else:
                         qtype = '1'
                     date = re.search('\d\d\d\d-\d\d-\d\d', message)
                     if date != None:
                         date = date.group(0)
+                        re.sub('\d\d\d\d-\d\d-\d\d','' , message)
                     if date == None:
                         date = '2010-01-01'
+                    # если надо искать вопрос на определенную тематику - ищем
+                    search = message.split(' ',1)[1]
+                    search = search..strip('." ')
+                    search = search.replace('"','')
+                    search = search.lower()
+                    search = search.replace('ё','е')
+                    if search == '':
+                        search = None
                     # получаем вопрос, отправляем его сообщением
-                    question, pic = getquestion(event,qtype,date)
+                    question, pic = getquestion(event,qtype,date,search)
                     if question != None:
                         sendmessage(event,question,pic)
                     # удаляем вопросы старше 1 дня (ибо лимит 10000 строк)
