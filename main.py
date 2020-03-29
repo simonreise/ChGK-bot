@@ -379,11 +379,14 @@ while True:
                         date = '2010-01-01'
                     # если надо искать вопрос на определенную тематику - ищем
                     search = message.split(' ',1)[1]
-                    search = search.strip('." ')
-                    search = search.replace('"','')
-                    search = search.lower()
-                    search = search.replace('ё','е')
-                    if search == '':
+                    if len(search) > 1:
+                        search = search.strip('." ')
+                        search = search.replace('"','')
+                        search = search.lower()
+                        search = search.replace('ё','е')
+                        if search == '':
+                            search = None
+                    else:
                         search = None
                     # получаем вопрос, отправляем его сообщением
                     question, pic = getquestion(event,qtype,date,search)
