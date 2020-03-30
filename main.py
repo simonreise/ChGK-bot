@@ -61,7 +61,7 @@ def getquestion(event,qtype='1', date = '2010-01-01', search = None):
         questionxml = ElementTree.fromstring(questionxml.content)
         qnumber = 0
     # извлекаем из xml вопрос, ответ, комментарий, автора, зачет, источник, турнир
-    if questionxml.findall('./question/Question')[qnumber] != None:
+    if questionxml.find('./question/Question') != None:
         question = questionxml.find('./question/Question').text
         if question != None:
             question = question.replace('\n',' ')
