@@ -35,14 +35,23 @@ vk = vk_session.get_api()
 def getquestion(event,qtype='1', date = '2010-01-01', search = None):
     # если игрок хочет получить вопрос через поиск
     if search != None:
-        # получаем 1000 вопросов по данному запросу (больше база получить не позволяет)
-        url = 'https://db.chgk.info/xml/search/questions/from_'+date+'/types'+qtype+'/limit1000/'+'"'+search+'"'
+        # получаем 1 вопрос по данному запросу
+        url = 'https://db.chgk.info/xml/search/questions/from_'+date+'/types'+qtype+'/limit1/'+'"'+search+'"'
         questionxml = requests.get(url)
         questionxml = ElementTree.fromstring(questionxml.content)
         if questionxml.findall('./question/Question') == []:
             return 'Увы, по вашему запросу ничего не найдено.', None
+        # узнаем, сколько всего вопросов
+        qnumber = int(questionxml.find('./total').text)
+        # база не позволяет получить больше 1000 вопросов
+        if qnumber > 1000:
+            qnumber = 1000
         # выбираем случайный вопрос
-        qnumber = random.randint(0,len(questionxml.findall('./question/Question'))-1)
+        qnumber = random.randint(0,qnumber-1)
+        # получаем выбранный вопрос
+        url = 'https://db.chgk.info/xml/search/questions/from_'+date+'/types'+qtype+'/limit1/"'+search+'"/?page='+str(qnumber)
+        questionxml = requests.get(url)
+        questionxml = ElementTree.fromstring(questionxml.content)
     # если игрок хочет получить случайный вопрос
     else:
         # собираем URL из аргументов
@@ -53,25 +62,25 @@ def getquestion(event,qtype='1', date = '2010-01-01', search = None):
         qnumber = 0
     # извлекаем из xml вопрос, ответ, комментарий, автора, зачет, источник, турнир
     if questionxml.findall('./question/Question')[qnumber] != None:
-        question = questionxml.findall('./question/Question')[qnumber].text
+        question = questionxml.find('./question/Question').text
         if question != None:
             question = question.replace('\n',' ')
-        answer = questionxml.findall('./question/Answer')[qnumber].text
+        answer = questionxml.find('./question/Answer').text
         if answer != None:
             answer = answer.replace('\n',' ')
-        comment = questionxml.findall('./question/Comments')[qnumber].text
+        comment = questionxml.find('./question/Comments').text
         if comment != None:
             comment = comment.replace('\n',' ')
-        author = questionxml.findall('./question/Authors')[qnumber].text
+        author = questionxml.find('./question/Authors').text
         if author != None:
             author = author.replace('\n',' ')
-        passcr = questionxml.findall('./question/PassCriteria')[qnumber].text
+        passcr = questionxml.find('./question/PassCriteria').text
         if passcr != None:
             passcr = passcr.replace('\n',' ')
-        resource = questionxml.findall('./question/Sources')[qnumber].text
+        resource = questionxml.find('./question/Sources').text
         if resource != None:
             resource = resource.replace('\n',' ')
-        tour = questionxml.findall('./question/tournamentTitle')[qnumber].text
+        tour = questionxml.find('./question/tournamentTitle').text
         if tour != None:
             tour = tour.replace('\n',' ')
         # получаем URL раздатки-картинки из вопроса и комментария если есть
