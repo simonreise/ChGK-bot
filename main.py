@@ -388,7 +388,7 @@ while True:
                     date = re.search('\d\d\d\d-\d\d-\d\d', message)
                     if date != None:
                         date = date.group(0)
-                        re.sub('\d\d\d\d-\d\d-\d\d','' , message)
+                        message = re.sub('\d\d\d\d-\d\d-\d\d','' , message)
                     if date == None:
                         date = '2010-01-01'
                     # если надо искать вопрос на определенную тематику - ищем
