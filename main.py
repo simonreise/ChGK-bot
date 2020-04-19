@@ -324,7 +324,7 @@ def onsianswer(event):
     if question != None:
         question = re.split('&&&', question)
     # после вопроса за 50 помечаем вопрос как отвеченный
-    if question == None:
+    if question == 'done':
         tabid = event.obj.message['peer_id']
         conn = psycopg2.connect(DATABASE_URL, sslmode='require')
         cursor = conn.cursor()
