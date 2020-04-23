@@ -166,7 +166,7 @@ def sendmessage(event,text,pic=None,kboard=None):
             image = session.get(image_url, stream=True)
             photo = upload.photo_messages(photos=image.raw)[0]
             attach='photo{}_{}'.format(photo['owner_id'], photo['id'])
-            if keyboard != None:
+            if kboard != None:
                 vk.messages.send(
                     peer_id = event.obj.message['peer_id'],
                     random_id=get_random_id(),
@@ -185,7 +185,7 @@ def sendmessage(event,text,pic=None,kboard=None):
             print(pic)
             pic = None
     if pic == None:
-        if keyboard != None:
+        if kboard != None:
             vk.messages.send(
                 peer_id = event.obj.message['peer_id'],
                 random_id=get_random_id(),
