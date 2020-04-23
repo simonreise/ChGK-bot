@@ -368,7 +368,7 @@ def onsianswer(event,user,answer=None):
     # после вопроса за 50 помечаем вопрос как отвеченный
     if 'done' in question:
         if user == True:
-            sendmessage(event,'',None,getkeyboard(True))
+            sendmessage(event,'Ответ правильный!',None,getkeyboard(True))
         else:
             if answer != None:
                 sendmessage(event,answer,None,getkeyboard(True))
