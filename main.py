@@ -410,7 +410,6 @@ def onsianswer(event,user,answer=None):
         question = "\n".join((question[0],question[1]))
         if question != None:
             sendmessage(event,question)
-    return done
     
 
 # ждем сообщений
