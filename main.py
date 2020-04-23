@@ -13,6 +13,7 @@ import vk_api
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 from vk_api import VkUpload
 from vk_api.utils import get_random_id
+from vk_api.keyboard import VkKeyboard
 
 # устанавливаем URL базы данных (для heroku оставить так)
 DATABASE_URL = os.environ['DATABASE_URL']
@@ -156,7 +157,7 @@ def getquestion(event,qtype='1', date = '2010-01-01', search = None):
     return question,pic
 
 # эта функция посылает сообщение в чат ивента с текстом и картинкой из аргументов
-def sendmessage(event,text,pic=None):
+def sendmessage(event,text,pic=None,kboard=None):
     if pic != None:
         # это на случай, если возникнет ошибка с загрузкой картинки. да, они иногда возникают, но очень редко
         try:
@@ -165,21 +166,62 @@ def sendmessage(event,text,pic=None):
             image = session.get(image_url, stream=True)
             photo = upload.photo_messages(photos=image.raw)[0]
             attach='photo{}_{}'.format(photo['owner_id'], photo['id'])
-            vk.messages.send(
-                peer_id = event.obj.message['peer_id'],
-                random_id=get_random_id(),
-                attachment=attach,
-                message=text
-                )
+            if keyboard != None:
+                vk.messages.send(
+                    peer_id = event.obj.message['peer_id'],
+                    random_id=get_random_id(),
+                    attachment=attach,
+                    message=text,
+                    keyboard=kboard
+                    )
+            else:
+                vk.messages.send(
+                    peer_id = event.obj.message['peer_id'],
+                    random_id=get_random_id(),
+                    attachment=attach,
+                    message=text
+                    )
         except:
             print(pic)
             pic = None
     if pic == None:
-        vk.messages.send(
-            peer_id = event.obj.message['peer_id'],
-            random_id=get_random_id(),
-            message=text
-            )
+        if keyboard != None:
+            vk.messages.send(
+                peer_id = event.obj.message['peer_id'],
+                random_id=get_random_id(),
+                message=text,
+                keyboard=kboard
+                )
+        else:
+            vk.messages.send(
+                peer_id = event.obj.message['peer_id'],
+                random_id=get_random_id(),
+                message=text
+                )
+  
+# эта функция возвращает json-объект клавиатуры
+def getkeyboard(answered):
+    keyboard = VkKeyboard()
+    # если игрок ответил на вопрос, предложить ему получить новый
+    if answered == True:
+        keyboard.add_button('Вопрос ЧГК','primary')
+        keyboard.add_button('Вопрос свояк')
+        keyboard.add_button('Вопрос брейн')
+        keyboard.add_line()
+        keyboard.add_button('Источник')
+        keyboard.add_line()
+        keyboard.add_button('Турнир')
+        keyboard.add_line()
+        keyboard.add_button('Автор')
+    # если игрок еще не ответил на вопрос, предложить получить ответ
+    elif answered == False:
+        keyboard.add_button('Ответ','primary')
+        keyboard.add_line()
+        keyboard.add_button('Турнир')
+        keyboard.add_line()
+        keyboard.add_button('Автор')
+    keyboard = keyboard.get_keyboard()
+    return keyboard
 
 # эта функция получает что-то (аргумет what = названию столбца БД) из БД
 def getfromtab(event,what):
@@ -293,10 +335,14 @@ def answercheck(event):
             answered = True
     # если ответ правильный, то обновляем соотв колонку в таблице и отправляем сообщение
     if answered == True:
-        sendmessage(event,'Ответ правильный!')
         if qtype == '5':
-            onsianswer(event)
+            done = onsianswer(event)
+            if done == False:
+                sendmessage(event,'Ответ правильный!')
+            else:
+                sendmessage(event,'Ответ правильный!',None,getkeyboard(True))
         else:
+            sendmessage(event,'Ответ правильный!',None,getkeyboard(True))
             tabid = event.obj.message['peer_id']
             conn = psycopg2.connect(DATABASE_URL, sslmode='require')
             cursor = conn.cursor()
@@ -325,6 +371,7 @@ def onsianswer(event):
         question = re.split('&&&', question)
     # после вопроса за 50 помечаем вопрос как отвеченный
     if 'done' in question:
+        done = True
         tabid = event.obj.message['peer_id']
         conn = psycopg2.connect(DATABASE_URL, sslmode='require')
         cursor = conn.cursor()
@@ -336,6 +383,7 @@ def onsianswer(event):
         conn.close()
     # перед вопросом за 50 убираем текст вопроса иначе шлем вопрос следующего номинала
     elif len(question) == 2:
+        done = False
         question = "\n".join((question[0],question[1]))
         if question != None:
             sendmessage(event,question)
@@ -350,9 +398,11 @@ def onsianswer(event):
         conn.close()
     # иначе возвращаем текст вопроса
     else:
+        done = False
         question = "\n".join((question[0],question[1]))
         if question != None:
             sendmessage(event,question)
+    return done
     
 
 # ждем сообщений
@@ -363,6 +413,9 @@ while True:
             if event.type == VkBotEventType.MESSAGE_NEW:
                 # переводим сообщение в ловеркейс
                 message = event.obj.message['text'].lower()
+                if message == 'начать':
+                    sendmessage(event,"Сейчас бот отправит вам случайный вопрос ЧГК из Базы!\nВы можете попробовать ответить на него, отправив сообщение «о <ваш ответ>», например, «о Пушкин».\nЕсли захотите узнать ответ на вопрос, нажмите кнопку «Ответ» на клавиатуре или отправив сообщение «ответ».")
+                    message = 'вопрос'
                 if message.split(' ',1)[0] == 'вопрос':
                     # определяем тип вопроса и дату, по умолчанию - чгк и 2010-01-01
                     if 'чгк' in message.split(' '):
@@ -406,7 +459,7 @@ while True:
                     # получаем вопрос, отправляем его сообщением
                     question, pic = getquestion(event,qtype,date,search)
                     if question != None:
-                        sendmessage(event,question,pic)
+                        sendmessage(event,question,pic,getkeyboard(False))
                     # удаляем вопросы старше 1 дня (ибо лимит 10000 строк)
                     currtime = int(time.time())
                     conn = psycopg2.connect(DATABASE_URL, sslmode='require')
@@ -426,9 +479,12 @@ while True:
                         if answer != None:
                             answer = re.split('&&&', answer)
                             answer = answer[1].lower()
+                            done = onsianswer(event)
                             if answer != None:
-                                sendmessage(event,answer)
-                            onsianswer(event)
+                                if done == True:
+                                    sendmessage(event,answer,None,getkeyboard(True))
+                                else:
+                                    sendmessage(event,answer)
                     else:
                         comment = getfromtab(event, 'qcomments')
                         commentpic = getfromtab(event, 'commentpic')
@@ -442,7 +498,7 @@ while True:
                         cursor.close()
                         conn.close()
                         if answer != None:
-                            sendmessage(event,answer)
+                            sendmessage(event,answer,None,getkeyboard(True))
                         if comment != None:
                             sendmessage(event,comment,commentpic)
                 # если вопрос отвечен, отправляем комментарий
