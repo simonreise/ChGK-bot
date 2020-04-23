@@ -352,7 +352,7 @@ def answercheck(event):
         sendmessage(event,'Увы, ответ неправильный.')
 
 # эта функция удаляет из вопроса своей игры вопрос и ответ текущего номинала, аргумент user == True, если игрок сам ответил на вопрос, а не попросил его
-def onsianswer(event,user):
+def onsianswer(event,user,answer=None):
     tabid = event.obj.message['peer_id']
     conn = psycopg2.connect(DATABASE_URL, sslmode='require')
     cursor = conn.cursor()
@@ -369,7 +369,9 @@ def onsianswer(event,user):
     if 'done' in question:
         if user == True:
             sendmessage(event,'',None,getkeyboard(True))
-        done = True
+        else:
+            if answer != None:
+                sendmessage(event,answer,None,getkeyboard(True))
         tabid = event.obj.message['peer_id']
         conn = psycopg2.connect(DATABASE_URL, sslmode='require')
         cursor = conn.cursor()
@@ -383,7 +385,9 @@ def onsianswer(event,user):
     elif len(question) == 2:
         if user == True:
             sendmessage(event,'Ответ правильный!')
-        done = False
+        else:
+            if answer != None:
+                sendmessage(event,answer)
         question = "\n".join((question[0],question[1]))
         if question != None:
             sendmessage(event,question)
@@ -400,7 +404,9 @@ def onsianswer(event,user):
     else:
         if user == True:
             sendmessage(event,'Ответ правильный!')
-        done = False
+        else:
+            if answer != None:
+                sendmessage(event,answer)
         question = "\n".join((question[0],question[1]))
         if question != None:
             sendmessage(event,question)
@@ -481,12 +487,7 @@ while True:
                         if answer != None:
                             answer = re.split('&&&', answer)
                             answer = answer[1].lower()
-                            done = onsianswer(event,False)
-                            if answer != None:
-                                if done == True:
-                                    sendmessage(event,answer,None,getkeyboard(True))
-                                else:
-                                    sendmessage(event,answer)
+                            done = onsianswer(event,False,answer)
                     else:
                         comment = getfromtab(event, 'qcomments')
                         commentpic = getfromtab(event, 'commentpic')
