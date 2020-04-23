@@ -336,7 +336,7 @@ def answercheck(event):
     # если ответ правильный, то обновляем соотв колонку в таблице и отправляем сообщение
     if answered == True:
         if qtype == '5':
-            onsianswer(event)
+            onsianswer(event,True)
         else:
             sendmessage(event,'Ответ правильный!',None,getkeyboard(True))
             tabid = event.obj.message['peer_id']
