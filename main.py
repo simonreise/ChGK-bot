@@ -336,11 +336,7 @@ def answercheck(event):
     # если ответ правильный, то обновляем соотв колонку в таблице и отправляем сообщение
     if answered == True:
         if qtype == '5':
-            done = onsianswer(event)
-            if done == False:
-                sendmessage(event,'Ответ правильный!')
-            else:
-                sendmessage(event,'Ответ правильный!',None,getkeyboard(True))
+            onsianswer(event)
         else:
             sendmessage(event,'Ответ правильный!',None,getkeyboard(True))
             tabid = event.obj.message['peer_id']
@@ -355,8 +351,8 @@ def answercheck(event):
     elif answered == False:
         sendmessage(event,'Увы, ответ неправильный.')
 
-# эта функция удаляет из вопроса своей игры вопрос и ответ текущего номинала
-def onsianswer(event):
+# эта функция удаляет из вопроса своей игры вопрос и ответ текущего номинала, аргумент user == True, если игрок сам ответил на вопрос, а не попросил его
+def onsianswer(event,user):
     tabid = event.obj.message['peer_id']
     conn = psycopg2.connect(DATABASE_URL, sslmode='require')
     cursor = conn.cursor()
@@ -371,6 +367,8 @@ def onsianswer(event):
         question = re.split('&&&', question)
     # после вопроса за 50 помечаем вопрос как отвеченный
     if 'done' in question:
+        if user == True:
+            sendmessage(event,'',None,getkeyboard(True))
         done = True
         tabid = event.obj.message['peer_id']
         conn = psycopg2.connect(DATABASE_URL, sslmode='require')
@@ -383,6 +381,8 @@ def onsianswer(event):
         conn.close()
     # перед вопросом за 50 убираем текст вопроса иначе шлем вопрос следующего номинала
     elif len(question) == 2:
+        if user == True:
+            sendmessage(event,'Ответ правильный!')
         done = False
         question = "\n".join((question[0],question[1]))
         if question != None:
@@ -398,6 +398,8 @@ def onsianswer(event):
         conn.close()
     # иначе возвращаем текст вопроса
     else:
+        if user == True:
+            sendmessage(event,'Ответ правильный!')
         done = False
         question = "\n".join((question[0],question[1]))
         if question != None:
@@ -479,7 +481,7 @@ while True:
                         if answer != None:
                             answer = re.split('&&&', answer)
                             answer = answer[1].lower()
-                            done = onsianswer(event)
+                            done = onsianswer(event,False)
                             if answer != None:
                                 if done == True:
                                     sendmessage(event,answer,None,getkeyboard(True))
