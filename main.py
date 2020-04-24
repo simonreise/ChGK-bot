@@ -65,7 +65,7 @@ def getquestion(event,qtype='1', date = '2010-01-01', qset = None, search = None
         qnum = random.randint(1,int(qline[1].replace('\n','')))
         questionxml = requests.get(url)
         questionxml = ElementTree.fromstring(questionxml.content)
-        num1 = questionxml.find('question').find('Number').text
+        num1 = int(questionxml.find('question').find('Number').text)
         qnum = qnum + num1 - 1
         for i in range(0,int(qline[1].replace('\n',''))):
             if int(questionxml.find('question').find('Number').text) != qnum:
