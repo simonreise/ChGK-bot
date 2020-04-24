@@ -33,7 +33,7 @@ vk = vk_session.get_api()
 # аргументы: 
 # qtype - тип вопроса (чгк, свояк и т.д.), по умолчанию чгк; 
 # date - с какой даты получать вопросы (чтобы отбросить разное а-ля чгк 90-х
-def getquestion(event,qtype='1', date = '2010-01-01', search = None):
+def getquestion(event,qtype='1', date = '2010-01-01', qset = None, search = None):
     # если игрок хочет получить вопрос через поиск
     if search != None:
         # получаем 1 вопрос по данному запросу
@@ -53,7 +53,27 @@ def getquestion(event,qtype='1', date = '2010-01-01', search = None):
         url = 'https://db.chgk.info/xml/search/questions/from_'+date+'/types'+qtype+'/limit1/"'+search+'"/?page='+str(qnumber)
         questionxml = requests.get(url)
         questionxml = ElementTree.fromstring(questionxml.content)
-    # если игрок хочет получить случайный вопрос
+    # Если игрок хочет получить вопрос из школьного или студенческого пакета
+    elif qset != None:
+        if qset == 'шк':
+            file = open('school.txt', 'r')
+        elif qset == 'студ':
+            file = open('stud.txt', 'r')
+        tours = file.readlines()
+        qline = tours[random.randint(0,len(tours)-1)].split(' ')
+        url = 'https://db.chgk.info/tour/'+qline[0]+'/xml'
+        qnum = random.randint(1,int(qline[1].replace('\n','')))
+        questionxml = requests.get(url)
+        questionxml = ElementTree.fromstring(questionxml.content)
+        for i in range(0,int(qline[1].replace('\n',''))):
+            if int(questionxml.find('question').find('Number').text) != qnum:
+                questionxml.remove(questionxml.find('question'))
+            else:
+                try:
+                    questionxml.remove(questionxml.findall('question')[1])
+                except:
+                    continue
+    # если игрок хочет получить случайный вопрос                
     else:
         # собираем URL из аргументов
         url = 'https://db.chgk.info/xml/random/from_'+date+'/types'+qtype+'/limit1/'
@@ -207,6 +227,9 @@ def getkeyboard(answered):
         keyboard.add_button('Вопрос ЧГК','primary')
         keyboard.add_button('Вопрос свояк')
         keyboard.add_button('Вопрос брейн')
+        keyboard.add_line()
+        keyboard.add_button('Вопрос студ')
+        keyboard.add_button('Вопрос шк')
         keyboard.add_line()
         keyboard.add_button('Источник')
         keyboard.add_line()
@@ -457,6 +480,14 @@ while True:
                         message = re.sub('\d\d\d\d-\d\d-\d\d','' , message)
                     if date == None:
                         date = '2010-01-01'
+                    if 'шк' in message.split(' '):
+                        qset = 'шк'
+                        message = message.replace('шк','',1)
+                    elif 'студ' in message.split(' '):
+                        qset = 'студ'
+                        message = message.replace('студ','',1)
+                    else:
+                        qset = None
                     # если надо искать вопрос на определенную тематику - ищем
                     search = message.split(' ',1)
                     if len(search) > 1:
@@ -470,7 +501,7 @@ while True:
                     else:
                         search = None
                     # получаем вопрос, отправляем его сообщением
-                    question, pic = getquestion(event,qtype,date,search)
+                    question, pic = getquestion(event,qtype,date,qset,search)
                     if question != None:
                         sendmessage(event,question,pic,getkeyboard(False))
                     # удаляем вопросы старше 1 дня (ибо лимит 10000 строк)
