@@ -191,19 +191,38 @@ def getquestion(event,qtype='1', date = '2010-01-01', qset = None, search = None
 
 # эта функция посылает сообщение в чат ивента с текстом и картинкой из аргументов
 def sendmessage(event,text,pic=None,kboard=None):
-    if pic != None:
-        # это на случай, если возникнет ошибка с загрузкой картинки. да, они иногда возникают, но очень редко
-        try:
-            upload = VkUpload(vk_session)
-            image_url = pic
-            image = session.get(image_url, stream=True)
-            photo = upload.photo_messages(photos=image.raw)[0]
-            attach='photo{}_{}'.format(photo['owner_id'], photo['id'])
+    if text != None and text != '':
+        if pic != None:
+            # это на случай, если возникнет ошибка с загрузкой картинки. да, они иногда возникают, но очень редко
+            try:
+                upload = VkUpload(vk_session)
+                image_url = pic
+                image = session.get(image_url, stream=True)
+                photo = upload.photo_messages(photos=image.raw)[0]
+                attach='photo{}_{}'.format(photo['owner_id'], photo['id'])
+                if kboard != None:
+                    vk.messages.send(
+                        peer_id = event.obj.message['peer_id'],
+                        random_id=get_random_id(),
+                        attachment=attach,
+                        message=text,
+                        keyboard=kboard
+                        )
+                else:
+                    vk.messages.send(
+                        peer_id = event.obj.message['peer_id'],
+                        random_id=get_random_id(),
+                        attachment=attach,
+                        message=text
+                        )
+            except:
+                print(pic)
+                pic = None
+        if pic == None:
             if kboard != None:
                 vk.messages.send(
                     peer_id = event.obj.message['peer_id'],
                     random_id=get_random_id(),
-                    attachment=attach,
                     message=text,
                     keyboard=kboard
                     )
@@ -211,26 +230,8 @@ def sendmessage(event,text,pic=None,kboard=None):
                 vk.messages.send(
                     peer_id = event.obj.message['peer_id'],
                     random_id=get_random_id(),
-                    attachment=attach,
                     message=text
                     )
-        except:
-            print(pic)
-            pic = None
-    if pic == None:
-        if kboard != None:
-            vk.messages.send(
-                peer_id = event.obj.message['peer_id'],
-                random_id=get_random_id(),
-                message=text,
-                keyboard=kboard
-                )
-        else:
-            vk.messages.send(
-                peer_id = event.obj.message['peer_id'],
-                random_id=get_random_id(),
-                message=text
-                )
   
 # эта функция возвращает json-объект клавиатуры
 def getkeyboard(answered):
