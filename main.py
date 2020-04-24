@@ -63,7 +63,10 @@ def getquestion(event,qtype='1', date = '2010-01-01', qset = None, search = None
         qline = tours[random.randint(0,len(tours)-1)].split(' ')
         url = 'https://db.chgk.info/tour/'+qline[0]+'/xml'
         qnum = random.randint(1,int(qline[1].replace('\n','')))
-        questionxml = requests.get(url)
+        try:
+            questionxml = requests.get(url)
+        except:
+            print(qline)
         questionxml = ElementTree.fromstring(questionxml.content)
         num1 = int(questionxml.find('question').find('Number').text)
         qnum = qnum + num1 - 1
