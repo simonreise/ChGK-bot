@@ -101,7 +101,15 @@ def getquestion(event,qtype='1', date = '2010-01-01', qset = None, search = None
         resource = questionxml.find('./question/Sources').text
         if resource != None:
             resource = resource.replace('\n',' ')
-        tour = questionxml.find('./question/tournamentTitle').text
+        tour = questionxml.find('./question/tournamentTitle')
+        if tour != None:
+            tour = tour.text
+        # Если в xml нет поля с названием турнира, значит это вопрос, взятый из пакета вручную (студ, шк) и надо его получить отдельно
+        else:
+            url = 'https://db.chgk.info/tour/'+qline[0].split('.')[0]+'/xml'
+            tourxml = requests.get(url)
+            tourxml = ElementTree.fromstring(tourxml.content)
+            tour = tourxml.find('Title').text
         if tour != None:
             tour = tour.replace('\n',' ')
         # получаем URL раздатки-картинки из вопроса и комментария если есть
