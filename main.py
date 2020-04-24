@@ -375,6 +375,10 @@ def answercheck(event):
             onsianswer(event,True)
         else:
             sendmessage(event,'Ответ правильный!',None,getkeyboard(True))
+            comment = getfromtab(event, 'qcomments')
+            commentpic = getfromtab(event, 'commentpic')
+            if comment != None:
+                sendmessage(event,comment,commentpic)
             tabid = event.obj.message['peer_id']
             conn = psycopg2.connect(DATABASE_URL, sslmode='require')
             cursor = conn.cursor()
@@ -408,10 +412,10 @@ def onsianswer(event,user,answer=None):
         else:
             if answer != None:
                 sendmessage(event,answer,None,getkeyboard(True))
-            comment = getfromtab(event, 'qcomments')
-            commentpic = getfromtab(event, 'commentpic')
-            if comment != None:
-                sendmessage(event,comment,commentpic)
+        comment = getfromtab(event, 'qcomments')
+        commentpic = getfromtab(event, 'commentpic')
+        if comment != None:
+            sendmessage(event,comment,commentpic)
         tabid = event.obj.message['peer_id']
         conn = psycopg2.connect(DATABASE_URL, sslmode='require')
         cursor = conn.cursor()
