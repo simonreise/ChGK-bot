@@ -246,9 +246,9 @@ def getkeyboard(answered):
         keyboard.add_button('Вопрос шк')
         keyboard.add_line()
         keyboard.add_button('Источник')
-        keyboard.add_line()
+        #keyboard.add_line()
         keyboard.add_button('Турнир')
-        keyboard.add_line()
+        #keyboard.add_line()
         keyboard.add_button('Автор')
     # если игрок еще не ответил на вопрос, предложить получить ответ
     elif answered == False:
