@@ -122,6 +122,8 @@ def getquestion(event,qtype='1', date = '2010-01-01', qset = None, search = None
                 else:
                     if qline != None:
                         tour = qline[0].split('.')[0]
+            else:
+                tour = tour.text
         if tour != None:
             tour = tour.replace('\n',' ')
         # получаем URL раздатки-картинки из вопроса и комментария если есть
