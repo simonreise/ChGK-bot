@@ -54,7 +54,7 @@ def getquestion(event,qtype='1', date = '2010-01-01', qset = None, search = None
         questionxml = requests.get(url)
         questionxml = ElementTree.fromstring(questionxml.content)
     # Если игрок хочет получить вопрос из школьного или студенческого пакета
-    elif qset != None:
+    elif qset != None and qtype == '1':
         if qset == 'шк':
             file = open('school.txt', 'r')
         elif qset == 'студ':
