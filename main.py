@@ -71,13 +71,16 @@ def getquestion(event,qtype='1', date = '2010-01-01', qset = None, search = None
         num1 = int(questionxml.find('question').find('Number').text)
         qnum = qnum + num1 - 1
         for i in range(0,int(qline[1].replace('\n',''))):
-            if int(questionxml.find('question').find('Number').text) != qnum:
-                questionxml.remove(questionxml.find('question'))
-            else:
-                try:
-                    questionxml.remove(questionxml.findall('question')[1])
-                except:
-                    continue
+            try:
+                if int(questionxml.find('question').find('Number').text) != qnum:
+                    questionxml.remove(questionxml.find('question'))
+                else:
+                    try:
+                        questionxml.remove(questionxml.findall('question')[1])
+                    except:
+                        continue
+            except:
+                print(qline)
     # если игрок хочет получить случайный вопрос                
     else:
         # собираем URL из аргументов
