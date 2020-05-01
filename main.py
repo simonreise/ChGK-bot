@@ -68,7 +68,10 @@ def getquestion(event,qtype='1', date = '2010-01-01', qset = None, search = None
         except:
             print(qline)
         questionxml = ElementTree.fromstring(questionxml.content)
-        num1 = int(questionxml.find('question').find('Number').text)
+        try:
+            num1 = int(questionxml.find('question').find('Number').text)
+        except:
+            print(qline)
         qnum = qnum + num1 - 1
         for i in range(0,int(qline[1].replace('\n',''))):
             try:
