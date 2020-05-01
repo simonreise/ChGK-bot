@@ -225,6 +225,7 @@ def sendmessage(event,text,pic=None,kboard=None):
                         )
             except:
                 print(pic)
+                text = pic + text
                 pic = None
         if pic == None:
             if kboard != None:
