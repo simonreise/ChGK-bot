@@ -1301,9 +1301,9 @@ sls2018i_u.3 12
 sls2018ii_u.1 13
 sls2018ii_u.2 12
 sls2018ii_u.3 12
-sls2018iii_u.1 12
-sls2018iii_u.2 12
-sls2018iii_u.3 12
+sls2018iii_u 36
+sls2018iii_u 36
+sls2018iii_u 36
 sls2019iv_u.1 12
 sls2019iv_u.2 12
 sls2019iv_u.3 12
