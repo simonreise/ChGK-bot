@@ -202,7 +202,7 @@ def getquestion(event,qtype='1', date = '2010-01-01', qset = None, search = None
 
 # эта функция посылает сообщение в чат ивента с текстом и картинкой из аргументов
 def sendmessage(event,text,pic=None,kboard=None):
-    if text != None and text != '':
+    if text != None and text.replace(' ', '') != '':
         if pic != None:
             # это на случай, если возникнет ошибка с загрузкой картинки. да, они иногда возникают, но очень редко
             try:
