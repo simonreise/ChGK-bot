@@ -731,6 +731,9 @@ lite-30_u.3 12
 lite-31_u.1 12
 lite-31_u.2 12
 lite-31_u.3 12
+lite-32_u.1 12
+lite-32_u.2 12
+lite-32_u.3 12
 sinlyu13.1 12
 sinlyu13.2 12
 sinlyu13.3 12
