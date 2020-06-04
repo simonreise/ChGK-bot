@@ -535,7 +535,7 @@ while True:
                     if question != None:
                         sendmessage(event,question,pic,getkeyboard(False))
                     # удаляем вопросы старше 1 дня (ибо лимит 10000 строк)
-                    currtime = int(time.time())
+                    '''currtime = int(time.time())
                     conn = psycopg2.connect(DATABASE_URL, sslmode='require')
                     cursor = conn.cursor()
                     values = (currtime,)
@@ -543,7 +543,7 @@ while True:
                     cursor.execute(insert,values)
                     conn.commit()
                     cursor.close()
-                    conn.close()
+                    conn.close()'''
                 # пользователь просит ответ, помечаем вопрос как отвеченный и отправляем ответ и комментарий
                 elif message == 'ответ':
                     qtype = getfromtab(event, 'qtype')
