@@ -1430,9 +1430,9 @@ lite_start-8_u.2 12
 lite_start-8_u.3 12
 lite_start-b_u.1 12
 lite_start-b_u.2 12
-litestart9_u.1 12
-litestart9_u.2 12
-litestart9_u.3 12
+lite_start9_u.1 12
+lite_start9_u.2 12
+lite_start9_u.3 12
 litestart10_u.1 12
 litestart10_u.2 12
 litestart10_u.3 12
