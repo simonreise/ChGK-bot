@@ -1340,6 +1340,12 @@ sls2019i_u.3 12
 sls2019ii_u.1 12
 sls2019ii_u.2 12
 sls2019ii_u.3 12
+sls2019iii_u.1 12
+sls2019iii_u.2 12
+sls2019iii_u.3 12
+sls2020iv_u.1 12
+sls2020iv_u.2 12
+sls2020iv_u.3 12
 harmol12.1 36
 harmol12.2 36
 harmol12.3 36
@@ -1472,3 +1478,6 @@ kubogn16.2 18
 git2018_u.1 20
 git2018_u.2 20
 git2018_u.3 20
+family20_u.1 12
+family20_u.2 12
+family20_u.3 12
