@@ -1467,6 +1467,9 @@ bdu19_u.1 15
 bdu19_u.2 15
 bdu19_u.3 15
 bdu19_u.4 15
+ligavuz19.1_u.1 12
+ligavuz19.1_u.2 12
+ligavuz19.1_u.3 12
 ligavuz19-5_u.1 12
 ligavuz19-5_u.2 12
 ligavuz19-5_u.3 12
