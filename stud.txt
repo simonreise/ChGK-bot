@@ -1346,6 +1346,9 @@ sls2019iii_u.3 12
 sls2020iv_u.1 12
 sls2020iv_u.2 12
 sls2020iv_u.3 12
+sls2019v_u.1 12
+sls2019v_u.2 12
+sls2019v_u.3 12
 harmol12.1 36
 harmol12.2 36
 harmol12.3 36
