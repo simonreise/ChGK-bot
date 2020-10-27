@@ -424,6 +424,14 @@ ukch13st.3 15
 ukch13st.4 15
 ukch13st.5 15
 ukch13st.6 15
+belst11.1 15
+belst11.2 15
+belst11.3 15
+belst11.4 15
+belst13_u.1 15
+belst13_u.2 15
+belst13_u.3 15
+belst13_u.4 15
 cup12chm.1 15
 cup12chm.2 15
 cup12chm.3 15
@@ -1013,6 +1021,12 @@ mgiint18_u.4 15
 mgiint18_u.5 15
 mgiint18_u.6 15
 mgiint18_u.7 15
+mgiint19_u.1 15
+mgiint19_u.2 15
+mgiint19_u.3 15
+mgiint19_u.4 15
+mgiint19_u.5 15
+mgiint19_u.6 15
 fizcup10.1 15
 fizcup10.2 15
 fizcup10.3 15
@@ -1349,6 +1363,9 @@ sls2020iv_u.3 12
 sls2019v_u.1 12
 sls2019v_u.2 12
 sls2019v_u.3 12
+sls2019vi_u.1 12
+sls2019vi_u.2 12
+sls2019vi_u.3 12
 harmol12.1 36
 harmol12.2 36
 harmol12.3 36
@@ -1473,6 +1490,9 @@ ligavuz19.1_u.3 12
 ligavuz19.2_u.1 12
 ligavuz19.2_u.2 12
 ligavuz19.2_u.3 12
+ligavuz19.3_u.1 12
+ligavuz19.3_u.2 12
+ligavuz19.3_u.3 12
 ligavuz19-5_u.1 12
 ligavuz19-5_u.2 12
 ligavuz19-5_u.3 12
