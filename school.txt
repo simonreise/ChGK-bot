@@ -577,6 +577,15 @@ iqpfoShO316_u.1 10
 iqpfoShO316_u.2 10
 iqpfoShO316_u.3 10
 iqpfoShO316_u.4 10
+17PFsh1_u 24
+17PFsh1_u 24
+17PFsh2_u.1 10
+17PFsh2_u.2 10
+17PFsh2_u.3 10
+17PFsh3_u.1 10
+17PFsh3_u.2 10
+17PFsh3_u.3 10
+17PFsh3_u.4 10
 shrek_u.1 24
 shrek_u.2 24
 shrek_u.3 24
