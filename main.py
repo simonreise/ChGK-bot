@@ -20,7 +20,8 @@ DATABASE_URL = os.environ['DATABASE_URL']
 # подключаемся к базе данных, таблице tokens, и получаем токен от группы вк
 conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 cursor = conn.cursor()
-cursor.execute('SELECT * FROM tokens WHERE name = "vk" LIMIT 1')
+vkstring = 'vk'
+cursor.execute('SELECT * FROM tokens WHERE name = %s LIMIT 1', vkstring)
 vktoken = cursor.fetchone()[1]
 cursor.close()
 conn.close()
