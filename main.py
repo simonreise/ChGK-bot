@@ -472,7 +472,7 @@ def onsianswer(event,user,answer=None):
 
 # ждем сообщений
 while True:
-    longpoll = VkBotLongPoll(vk_session, '192574160')
+    longpoll = VkBotLongPoll(vk_session, '177823701')
     try:
         for event in longpoll.listen():
             if event.type == VkBotEventType.MESSAGE_NEW:
