@@ -478,8 +478,8 @@ while True:
             if event.type == VkBotEventType.MESSAGE_NEW:
                 # переводим сообщение в ловеркейс
                 message = event.obj.message['text'].lower()
-                message = message.replace('[club192574160|что? где? когда? бот] ','')
-                message = message.replace('[club192574160|@bot_chgk] ','')
+                message = message.replace('[club177823701|чгкрески] ','')
+                message = message.replace('[club177823701|@chgkreski] ','')
                 if message == 'начать':
                     sendmessage(event,"Сейчас бот отправит вам случайный вопрос ЧГК из Базы!\nВы можете попробовать ответить на него, отправив сообщение «о <ваш ответ>», например, «о Пушкин».\nЕсли захотите узнать ответ на вопрос, нажмите кнопку «Ответ» на клавиатуре или отправьте сообщение «ответ».\nУзнать больше о доступных командах можно здесь - https://vk.cc/ariwHL")
                     message = 'вопрос'
