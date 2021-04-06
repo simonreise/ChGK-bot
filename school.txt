@@ -589,6 +589,6 @@ iqpfoShO316_u.4 10
 shrek_u.1 24
 shrek_u.2 24
 shrek_u.3 24
-shrek_u.4 24
+shrek_u.4 23
 shrek_u.5 24
 shrek_u.6 24
