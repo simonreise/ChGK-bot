@@ -17,6 +17,10 @@ from vk_api.utils import get_random_id
 from vk_api.keyboard import VkKeyboard
 
 # устанавливаем URL базы данных (для heroku оставить так)
+HOST = os.environ['HOST']
+USERNAME = os.environ['USERNAME']
+PASSWORD = os.environ['PASSWORD']
+DB = os.environ['DB']
 #DATABASE_URL = os.environ['DATABASE_URL']
 # подключаемся к базе данных, таблице tokens, и получаем токен от группы вк
 conn = MySQLdb.connect(HOST, USERNAME, PASSWORD, DB)
