@@ -7,8 +7,9 @@ import sched
 import json
 import difflib
 from xml.etree import ElementTree
-import psycopg2
-from psycopg2 import sql
+#import psycopg2
+#from psycopg2 import sql
+import MySQLdb
 import vk_api
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 from vk_api import VkUpload
@@ -16,9 +17,11 @@ from vk_api.utils import get_random_id
 from vk_api.keyboard import VkKeyboard
 
 # устанавливаем URL базы данных (для heroku оставить так)
-DATABASE_URL = os.environ['DATABASE_URL']
+#DATABASE_URL = os.environ['DATABASE_URL']
 # подключаемся к базе данных, таблице tokens, и получаем токен от группы вк
-conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+conn = MySQLdb.connect(HOST, USERNAME, PASSWORD, DB)
+#conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+
 cursor = conn.cursor()
 vkstring = ('vk',)
 cursor.execute('SELECT * FROM tokens WHERE name = %s LIMIT 1', vkstring)
@@ -184,7 +187,8 @@ def getquestion(event,qtype='1', date = '2010-01-01', qset = None, search = None
                     question = '&&&'.join(question)
                     answer = '&&&'.join(answer)
         # записываем полученные данные в БД
-        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+        conn = MySQLdb.connect(HOST, USERNAME, PASSWORD, DB)
+        #conn = psycopg2.connect(DATABASE_URL, sslmode='require')
         cursor = conn.cursor()
         values = (tabid, question, pic, answer, passcr, author, comment, commentpic, resource, tour, currtime, answered, qtype, question, pic, answer, passcr, author, comment, commentpic, resource, tour, currtime, answered, qtype)
         insert = ('INSERT INTO questions (tabid, question, pic, answer, pass, author, qcomments, commentpic, sources, tour, created, answered, qtype) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (tabid) DO UPDATE SET question = %s, pic = %s, answer = %s, pass = %s, author = %s, qcomments = %s, commentpic = %s, sources = %s, tour = %s, created = %s, answered = %s, qtype = %s')
@@ -276,7 +280,8 @@ def getkeyboard(answered):
 # эта функция получает что-то (аргумет what = названию столбца БД) из БД
 def getfromtab(event,what):
     tabid = event.obj.message['peer_id']
-    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    conn = MySQLdb.connect(HOST, USERNAME, PASSWORD, DB)
+    #conn = psycopg2.connect(DATABASE_URL, sslmode='require')
     cursor = conn.cursor()
     values = (tabid,)
     if what == 'question':
@@ -394,7 +399,8 @@ def answercheck(event):
             if comment != None:
                 sendmessage(event,comment,commentpic)
             tabid = event.obj.message['peer_id']
-            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+            conn = MySQLdb.connect(HOST, USERNAME, PASSWORD, DB)
+            #conn = psycopg2.connect(DATABASE_URL, sslmode='require')
             cursor = conn.cursor()
             values = (tabid,)
             insert = ('UPDATE questions SET answered = true WHERE tabid = %s')
@@ -408,7 +414,8 @@ def answercheck(event):
 # эта функция удаляет из вопроса своей игры вопрос и ответ текущего номинала, аргумент user == True, если игрок сам ответил на вопрос, а не попросил его
 def onsianswer(event,user,answer=None):
     tabid = event.obj.message['peer_id']
-    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    conn = MySQLdb.connect(HOST, USERNAME, PASSWORD, DB)
+    #conn = psycopg2.connect(DATABASE_URL, sslmode='require')
     cursor = conn.cursor()
     values = (tabid,)
     insert = ("UPDATE questions SET question = (SELECT REGEXP_REPLACE(question, '(&&&.*\s)+?&&&', '&&&')), answer = (SELECT REGEXP_REPLACE(answer, '(&&&.*\s)+?&&&', '&&&')) WHERE tabid = %s")
@@ -431,7 +438,8 @@ def onsianswer(event,user,answer=None):
         if comment != None:
             sendmessage(event,comment,commentpic)
         tabid = event.obj.message['peer_id']
-        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+        conn = MySQLdb.connect(HOST, USERNAME, PASSWORD, DB)
+        #conn = psycopg2.connect(DATABASE_URL, sslmode='require')
         cursor = conn.cursor()
         values = (tabid,)
         insert = ('UPDATE questions SET answered = true WHERE tabid = %s')
@@ -450,7 +458,8 @@ def onsianswer(event,user,answer=None):
         if question != None:
             sendmessage(event,question)
         tabid = event.obj.message['peer_id']
-        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+        conn = MySQLdb.connect(HOST, USERNAME, PASSWORD, DB)
+        #conn = psycopg2.connect(DATABASE_URL, sslmode='require')
         cursor = conn.cursor()
         values = ('done',tabid)
         insert = ('UPDATE questions SET question = %s WHERE tabid = %s')
@@ -559,7 +568,8 @@ while True:
                         comment = getfromtab(event, 'qcomments')
                         commentpic = getfromtab(event, 'commentpic')
                         tabid = event.obj.message['peer_id']
-                        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+                        conn = MySQLdb.connect(HOST, USERNAME, PASSWORD, DB)
+                        #conn = psycopg2.connect(DATABASE_URL, sslmode='require')
                         cursor = conn.cursor()
                         values = (tabid,)
                         insert = ('UPDATE questions SET answered = true WHERE tabid = %s')
