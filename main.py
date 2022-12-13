@@ -195,7 +195,7 @@ def getquestion(event,qtype='1', date = '2010-01-01', qset = None, search = None
         #conn = psycopg2.connect(DATABASE_URL, sslmode='require')
         cursor = conn.cursor()
         values = (tabid, question, pic, answer, passcr, author, comment, commentpic, resource, tour, currtime, answered, qtype, question, pic, answer, passcr, author, comment, commentpic, resource, tour, currtime, answered, qtype)
-        insert = ('INSERT INTO questions (tabid, question, pic, answer, pass, author, qcomments, commentpic, sources, tour, created, answered, qtype) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON ON DUPLICATE KEY UPDATE question = %s, pic = %s, answer = %s, pass = %s, author = %s, qcomments = %s, commentpic = %s, sources = %s, tour = %s, created = %s, answered = %s, qtype = %s')
+        insert = ('INSERT INTO questions (tabid, question, pic, answer, pass, author, qcomments, commentpic, sources, tour, created, answered, qtype) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE question = %s, pic = %s, answer = %s, pass = %s, author = %s, qcomments = %s, commentpic = %s, sources = %s, tour = %s, created = %s, answered = %s, qtype = %s')
         #insert = ('INSERT INTO questions (tabid, question, pic, answer, pass, author, qcomments, commentpic, sources, tour, created, answered, qtype) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (tabid) DO UPDATE SET question = %s, pic = %s, answer = %s, pass = %s, author = %s, qcomments = %s, commentpic = %s, sources = %s, tour = %s, created = %s, answered = %s, qtype = %s')
         cursor.execute(insert, values)
         conn.commit()
