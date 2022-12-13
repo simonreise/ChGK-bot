@@ -261,7 +261,7 @@ def getkeyboard(answered):
     # если игрок ответил на вопрос, предложить ему получить новый
     if answered == True:
         keyboard.add_button('Вопрос ЧГК','primary')
-        keyboard.add_button('Вопрос свояк')
+        #keyboard.add_button('Вопрос свояк')
         keyboard.add_button('Вопрос брейн')
         keyboard.add_line()
         keyboard.add_button('Вопрос студ')
