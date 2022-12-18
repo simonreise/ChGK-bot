@@ -547,7 +547,7 @@ while True:
                         search = None
                     # получаем вопрос, отправляем его сообщением
                     # временно вопросы свояка не работают, когда pythonanywhere обновят mysql надо убрать if
-                    if qtype != '5'
+                    if qtype != '5':
                         question, pic = getquestion(event,qtype,date,qset,search)
                     else:
                         question = None
