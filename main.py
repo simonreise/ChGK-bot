@@ -1,6 +1,7 @@
 import os
 import re
 import random
+from pathlib import Path
 import requests
 import time
 import sched
@@ -37,6 +38,8 @@ session = requests.Session()
 vk_session = vk_api.VkApi(token=vktoken)
 vk = vk_session.get_api()
 
+THIS_FOLDER = Path(__file__).parent.resolve()
+
 # эта функция получает вопрос из базы и записывает его в БД, возвращает вопрос и раздатку-картинку (если есть)
 # аргументы: 
 # qtype - тип вопроса (чгк, свояк и т.д.), по умолчанию чгк; 
@@ -64,9 +67,9 @@ def getquestion(event,qtype='1', date = '2010-01-01', qset = None, search = None
     # Если игрок хочет получить вопрос из школьного или студенческого пакета
     elif qset != None and qtype == '1':
         if qset == 'шк':
-            file = open('school.txt', 'r')
+            file = open(THIS_FOLDER / 'school.txt', 'r')
         elif qset == 'студ':
-            file = open('stud.txt', 'r')
+            file = open(THIS_FOLDER / 'stud.txt', 'r')
         tours = file.readlines()
         qline = tours[random.randint(0,len(tours)-1)].split(' ')
         url = 'https://db.chgk.info/tour/'+qline[0]+'/xml'
