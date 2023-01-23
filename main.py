@@ -630,3 +630,7 @@ while True:
                         answercheck(event) 
     except requests.exceptions.ReadTimeout as timeout:
         continue
+    except requests.exceptions.ProxyError as proxy:
+        continue
+    except:
+        continue
