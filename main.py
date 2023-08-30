@@ -264,7 +264,7 @@ def getkeyboard(answered):
     # если игрок ответил на вопрос, предложить ему получить новый
     if answered == True:
         keyboard.add_button('Вопрос ЧГК','primary')
-        #keyboard.add_button('Вопрос свояк')
+        keyboard.add_button('Вопрос свояк')
         keyboard.add_button('Вопрос брейн')
         keyboard.add_line()
         keyboard.add_button('Вопрос студ')
@@ -549,11 +549,7 @@ while True:
                     else:
                         search = None
                     # получаем вопрос, отправляем его сообщением
-                    # временно вопросы свояка не работают, когда pythonanywhere обновят mysql надо убрать if
-                    if qtype != '5':
-                        question, pic = getquestion(event,qtype,date,qset,search)
-                    else:
-                        question = None
+                   question, pic = getquestion(event,qtype,date,qset,search)
                     if question != None:
                         sendmessage(event,question,pic,getkeyboard(False))
                     # удаляем вопросы старше 1 дня (ибо лимит 10000 строк)
