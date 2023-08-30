@@ -170,12 +170,12 @@ def getquestion(event,qtype='1', date = '2010-01-01', qset = None, search = None
         tabid = event.obj.message['peer_id']
         # по дефолту вопрос не отвечен))
         answered = False
-        # заменяем номера вопросов на &&&
+        # заменяем номера вопросов на ֍֍֍
         if qtype == '5':
             tag = re.search(' 10{0,1}\. ',question).group(0)
             qnum = int(re.search('1\d{0,1}',tag).group(0))
-            question = question.replace(tag, '&&&'+str(qnum)+'. ', 1)
-            answer = answer.replace(tag, '&&&'+' ', 1)
+            question = question.replace(tag, '֍֍֍'+str(qnum)+'. ', 1)
+            answer = answer.replace(tag, '֍֍֍'+' ', 1)
             if qnum == 10:
                 ten = True
             else:
@@ -186,13 +186,13 @@ def getquestion(event,qtype='1', date = '2010-01-01', qset = None, search = None
                 else:
                     qnum +=1
                 tag = ' '+str(qnum)+'. '
-                if tag in answer.split('&&&')[-1]:
-                    question = question.split('&&&')
-                    answer = answer.split('&&&')
-                    question[-1] = question[-1].replace(tag, ' &&&'+str(qnum)+'. ', 1)
-                    answer[-1] = answer[-1].replace(tag, ' &&& ', 1)
-                    question = '&&&'.join(question)
-                    answer = '&&&'.join(answer)
+                if tag in answer.split('֍֍֍')[-1]:
+                    question = question.split('֍֍֍')
+                    answer = answer.split('֍֍֍')
+                    question[-1] = question[-1].replace(tag, ' ֍֍֍'+str(qnum)+'. ', 1)
+                    answer[-1] = answer[-1].replace(tag, ' ֍֍֍ ', 1)
+                    question = '֍֍֍'.join(question)
+                    answer = '֍֍֍'.join(answer)
         # записываем полученные данные в БД
         conn = MySQLdb.connect(HOST, USERNAME, PASSWORD, DB)
         #conn = psycopg2.connect(DATABASE_URL, sslmode='require')
@@ -206,7 +206,7 @@ def getquestion(event,qtype='1', date = '2010-01-01', qset = None, search = None
         conn.close()
         # Если вопрос свояка, обрезаем его до вопроса за 10
         if qtype == '5':
-            question = re.split('&&&', question)
+            question = re.split('֍֍֍', question)
             question = "\n".join((question[0],question[1]))
     else:
         question = None
@@ -337,7 +337,7 @@ def answercheck(event):
     qtype = getfromtab(event,'qtype')
     if qtype == '5':
         answersi = answers[0]
-        answersi = re.split('&&&', answersi)
+        answersi = re.split('֍֍֍', answersi)
         answersi = answersi[1].lower()
         answersi = answersi.replace('ё','е')
         # извлекаем критерии зачета
@@ -426,14 +426,15 @@ def onsianswer(event,user,answer=None):
     #conn = psycopg2.connect(DATABASE_URL, sslmode='require')
     cursor = conn.cursor()
     values = (tabid,)
-    insert = ("UPDATE questions SET question = (SELECT REGEXP_REPLACE(question, '(&&&.*\s)+?&&&', '&&&')), answer = (SELECT REGEXP_REPLACE(answer, '(&&&.*\s)+?&&&', '&&&')) WHERE tabid = %s")
+    # insert = ("UPDATE questions SET question = (SELECT REGEXP_REPLACE(question, '(&&&.*\s)+?&&&', '&&&')), answer = (SELECT REGEXP_REPLACE(answer, '(&&&.*\s)+?&&&', '&&&')) WHERE tabid = %s")
+    insert = ("UPDATE questions SET question = (SELECT REGEXP_REPLACE(question, '֍֍֍[^֍]+֍֍֍', '֍֍֍', 1, 1)), answer = (SELECT REGEXP_REPLACE(answer, '֍֍֍[^֍]+֍֍֍', '֍֍֍', 1, 1)) WHERE tabid = %s")
     cursor.execute(insert, values)
     conn.commit()
     cursor.close()
     conn.close()
     question = getfromtab(event,'question')
     if question != None:
-        question = re.split('&&&', question)
+        question = re.split('֍֍֍', question)
     # после вопроса за 50 помечаем вопрос как отвеченный
     if 'done' in question:
         if user == True:
@@ -569,7 +570,7 @@ while True:
                     # если вопрос свояка, то обрезаем ответ и просим следующий вопрос
                     if qtype == '5':
                         if answer != None:
-                            answer = re.split('&&&', answer)
+                            answer = re.split('֍֍֍', answer)
                             answer = answer[1].lower()
                             done = onsianswer(event,False,answer)
                     else:
