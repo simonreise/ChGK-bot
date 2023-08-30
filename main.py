@@ -549,7 +549,7 @@ while True:
                     else:
                         search = None
                     # получаем вопрос, отправляем его сообщением
-                   question, pic = getquestion(event,qtype,date,qset,search)
+                    question, pic = getquestion(event,qtype,date,qset,search)
                     if question != None:
                         sendmessage(event,question,pic,getkeyboard(False))
                     # удаляем вопросы старше 1 дня (ибо лимит 10000 строк)
